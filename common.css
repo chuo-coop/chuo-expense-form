@@ -1,0 +1,415 @@
+/* =============================================
+   中央大学生協 共通スタイル
+   common.css  v1.0 (2026.06)
+   ─────────────────────────────────────────────
+   全ページで読み込む基盤CSS。
+   ページ固有スタイルは page-xxx.css に記述。
+   ============================================= */
+
+/* ── CSS変数（カラートークン）─────────────────── */
+:root {
+  --green:        #00B295;
+  --green-dark:   #008F7A;
+  --green-light:  rgba(0, 178, 149, 0.22);
+  --white:        #FFFFFF;
+  --warm-white:   #FAF8F1;
+  --warm-beige:   #F6F4EE;
+  --border:       #DEDBD2;
+  --border-warm:  #E5DCC9;
+  --text-main:    #252525;
+  --text-sub:     #555555;
+  --text-muted:   #777777;
+  --caution:      #C0392B;
+  --badge-bg:     #8A8176;
+  --shadow-card:  0 10px 24px rgba(0, 0, 0, .08);
+}
+
+/* ── リセット ──────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: "Noto Sans JP", "Yu Gothic", sans-serif;
+  color: var(--text-main);
+  background: var(--white);
+  line-height: 1.75;
+}
+
+/* ── コンテナ ──────────────────────────────────── */
+.container {
+  width: min(1120px, calc(100% - 40px));
+  margin: 0 auto;
+}
+
+/* ── ヘッダー ──────────────────────────────────── */
+.site-head {
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+}
+.site-head__inner {
+  min-height: 74px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+.site-logo {
+  font-weight: 500;
+  font-size: 15px;
+  text-decoration: none;
+  color: var(--text-main);
+}
+.site-contact {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+.site-contact a {
+  color: var(--green-dark);
+  text-decoration: none;
+}
+.site-nav {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.site-nav a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 999px;
+  background: var(--warm-beige);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+/* ── ヒーロー ──────────────────────────────────── */
+.hero {
+  background: linear-gradient(180deg, var(--white) 0%, var(--warm-white) 100%);
+  padding: 46px 0;
+  border-bottom: 1px solid var(--border);
+}
+.hero h1 {
+  font-size: clamp(30px, 5vw, 48px);
+  font-weight: 900;
+  line-height: 1.25;
+  margin-bottom: 16px;
+}
+.hero h1 span {
+  background: linear-gradient(transparent 62%, var(--green-light) 62%);
+}
+.hero p {
+  font-size: 16px;
+  color: var(--text-sub);
+  max-width: 760px;
+}
+
+/* ── ご注文の流れ（フロー）────────────────────── */
+.flow {
+  margin: 14px 0 12px;
+  padding-left: 1.4em;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.flow li {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--text-sub);
+}
+.flow-note {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.8;
+  margin-top: 10px;
+}
+.flow-caution {
+  color: var(--caution);
+  font-weight: 700;
+}
+
+/* ── ボタン ────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 22px;
+  border-radius: 999px;
+  border: 0;
+  background: var(--green);
+  color: var(--white);
+  text-decoration: none;
+  font-weight: 900;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.btn:hover {
+  background: var(--green-dark);
+}
+.btn-sub {
+  background: var(--white);
+  color: var(--green-dark);
+  border: 2px solid var(--green);
+}
+.btn-sub:hover {
+  background: var(--warm-white);
+}
+
+/* ── フォーム基本 ───────────────────────────────── */
+.input, .select, textarea {
+  width: 100%;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-family: inherit;
+  font-size: 15px;
+  background: var(--white);
+}
+.input:focus, .select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--green);
+}
+textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.field-full {
+  grid-column: 1 / -1;
+}
+.field label {
+  font-size: 13px;
+  font-weight: 900;
+}
+.req {
+  display: inline-block;
+  margin-left: 5px;
+  background: var(--green);
+  color: var(--white);
+  border-radius: 999px;
+  font-size: 10px;
+  padding: 1px 7px;
+}
+.field-note {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.privacy {
+  background: #F8F4E9;
+  border: 1px solid var(--border-warm);
+  border-radius: 14px;
+  padding: 15px;
+  font-size: 13px;
+  margin-top: 14px;
+}
+.privacy label {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-weight: 700;
+}
+.privacy a {
+  color: var(--green-dark);
+}
+
+/* ── ページトップ ───────────────────────────────── */
+.coop-page-top-wrap {
+  max-width: 1200px;
+  margin: 52px auto 0;
+  padding: 0 clamp(20px, 5vw, 48px) 34px;
+  border-top: 1px solid rgba(0, 0, 0, .16);
+  text-align: right;
+}
+.coop-page-top {
+  display: inline-block;
+  margin-top: 28px;
+  color: var(--green);
+  font-size: 16px;
+  font-weight: 700;
+  text-decoration: none;
+}
+.coop-page-top:hover {
+  text-decoration: underline;
+}
+
+/* ── フッター ──────────────────────────────────── */
+.coop-foot {
+  font-family: inherit;
+  color: rgb(50, 47, 46);
+  font-size: 14px;
+  line-height: 1.5;
+  background-image: url("https://www.chudai-seikyo.or.jp/re_img/common/bg.jpg");
+  background-repeat: repeat;
+  padding: 21.6px 0 0;
+}
+.coop-foot, .coop-foot * { box-sizing: border-box; }
+.coop-foot a { color: rgb(50, 47, 46); text-decoration: none; }
+.coop-foot__wrapper { width: min(486px, calc(100% - 54px)); margin: 0 auto; }
+.coop-foot__wrap { margin: 0 0 35.1px; }
+.coop-foot__info { margin: 0 0 22px; }
+.coop-foot__logo { width: 194px; margin: 0 0 18px; }
+.coop-foot__logo img { display: block; width: 100%; height: auto; }
+.coop-foot__address { font-size: 14px; line-height: 1.5; margin: 0 0 22px; }
+.coop-foot__links { font-size: 13px; line-height: 1.5; }
+.coop-foot__link-item {
+  display: inline-block;
+  position: relative;
+  font-size: 13px;
+  line-height: 19.5px;
+  background: #fff;
+  margin: 0 8px 10px 0;
+  padding: 3px 24px 3px 10px;
+  border: 1px solid rgba(0, 0, 0, .1);
+  border-radius: 50px;
+  box-shadow: 2px 3px 0 rgba(0, 0, 0, .10);
+  vertical-align: top;
+  white-space: nowrap;
+}
+.coop-foot__link-item::after {
+  content: "›";
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-52%);
+  color: var(--green);
+  font-weight: 700;
+}
+.coop-foot__sns-block { display: block; }
+.coop-foot__sns-wrap {
+  width: 360px;
+  max-width: 100%;
+  display: flex;
+  margin: 0 0 15px;
+  border-radius: 5px;
+  overflow: hidden;
+  box-shadow: 2px 3px 0 rgba(0, 0, 0, .08);
+}
+.coop-foot__sns-head {
+  width: 107px;
+  min-height: 86.6667px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 107px;
+}
+.coop-foot__sns-head--line { background: rgb(0, 185, 0); }
+.coop-foot__sns-head--x   { background: rgb(29, 139, 215); }
+.coop-foot__sns-head--line img,
+.coop-foot__sns-head--x   img { display: block; width: 78%; max-width: 84px; height: auto; }
+.coop-foot__sns-body { width: 253px; display: flex; flex-wrap: wrap; background: #fff; }
+.coop-foot__sns-item {
+  width: 50%;
+  min-height: 43.6667px;
+  display: flex;
+  align-items: center;
+  position: relative;
+  font-size: 12px;
+  line-height: 18px;
+  background: #fff;
+  padding: 12px 24px 10px 18px;
+  border-left: 1px solid rgba(0, 178, 149, .55);
+  border-bottom: 1px solid rgba(0, 178, 149, .55);
+}
+.coop-foot__sns-wrap--x .coop-foot__sns-item {
+  border-left-color: rgba(29, 139, 215, .55);
+  border-bottom-color: rgba(29, 139, 215, .55);
+}
+.coop-foot__sns-item:nth-child(3),
+.coop-foot__sns-item:nth-child(4) { border-bottom: 0; }
+.coop-foot__sns-item::after {
+  content: "▶";
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--green);
+  font-size: 10px;
+  font-weight: 700;
+}
+.coop-foot__sns-wrap--x .coop-foot__sns-item::after { color: #1d8bd7; }
+.coop-foot__app {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  margin: 22px 0 0;
+  min-height: 100px;
+  flex-wrap: nowrap;
+}
+.coop-foot__app-main img { width: 100px; height: 100px; display: block; }
+.coop-foot__store-badges { display: flex; align-items: center; gap: 18px; flex-wrap: nowrap; }
+.coop-foot__store-badges img { width: 110px; height: auto; display: block; }
+.coop-foot__bottom {
+  background: var(--green);
+  padding: 20px 0 40px;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--white);
+}
+.coop-foot__bottom-inner {
+  width: min(486px, calc(100% - 54px));
+  margin: 0 auto;
+}
+.coop-foot__copyright { margin: 0 0 10px; }
+.coop-foot__bottom-links a {
+  color: var(--white);
+  font-size: 12px;
+  margin: 0 22px 0 0;
+  text-decoration: none;
+}
+.coop-foot__bottom-links a::after { content: "↗"; margin-left: 6px; font-size: 10px; }
+.coop-foot__bottom-links a:not(:first-child)::after { content: ""; margin: 0; }
+
+/* ── レスポンシブ ───────────────────────────────── */
+@media (min-width: 768px) {
+  .coop-foot__wrapper,
+  .coop-foot__bottom-inner { width: min(1080px, calc(100% - 80px)); }
+  .coop-foot__wrap { display: flex; justify-content: space-between; align-items: flex-start; gap: 40px; }
+  .coop-foot__info { flex: 1; margin-bottom: 0; }
+  .coop-foot__sns-block { width: 520px; flex-shrink: 0; }
+  .coop-foot__bottom-inner { display: flex; justify-content: space-between; gap: 24px; }
+  .coop-foot__copyright { margin: 0; }
+}
+
+@media (max-width: 900px) {
+  .site-head__inner { padding: 16px 0; align-items: flex-start; flex-direction: column; }
+  .form-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 600px) {
+  .container { width: calc(100% - 32px); }
+  .coop-foot__wrapper,
+  .coop-foot__bottom-inner { width: calc(100% - 32px); }
+  .coop-foot__sns-wrap { width: 100%; }
+  .coop-foot__sns-head { width: 96px; flex-basis: 96px; }
+  .coop-foot__sns-body { width: calc(100% - 96px); }
+  .coop-foot__sns-item { padding-left: 12px; padding-right: 20px; }
+  .coop-foot__app { gap: 14px; flex-wrap: wrap; }
+  .coop-foot__store-badges { gap: 10px; }
+}
+
+.coop-foot__sns-wrap--line .coop-foot__sns-head { background: rgb(0, 185, 0); }
+.coop-foot__sns-wrap--x   .coop-foot__sns-head { background: rgb(29, 139, 215); }
+.coop-foot__app-main img { width: 100px; height: 100px; display: block; }
+.coop-foot__bottom-links { display: flex; flex-wrap: wrap; gap: 4px 0; }

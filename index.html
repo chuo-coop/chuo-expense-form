@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>交通費申請｜中央大学生活協同組合</title>
+  <link rel="stylesheet" href="./common.css">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <header class="site-head">
+    <div class="container site-head__inner">
+      <a class="site-logo" href="../">中央大学生活協同組合　社内申請</a>
+      <nav class="site-nav" aria-label="申請メニュー">
+        <a href="../">申請メニュー</a>
+        <span class="save-state" id="saveState">入力中</span>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero expense-hero">
+    <div class="container">
+      <p class="page-kicker">社内申請</p>
+      <h1><span>交通費申請</span></h1>
+      <p>路線検索結果を貼り付けると、実際に運賃が発生した乗車地・降車地・IC運賃を自動で取り込みます。</p>
+    </div>
+  </section>
+
+  <main class="container expense-main">
+    <section class="rule-box" aria-label="申請ルール">
+      <strong>申請ルール</strong>
+      <p>通勤定期区間を除き、PASMO・Suica等のIC運賃で申請してください。食事代は申請対象外です。</p>
+    </section>
+
+    <form id="expenseForm" novalidate>
+      <section class="form-card">
+        <div class="card-title"><span>1</span><h2>申請者情報</h2></div>
+        <div class="form-grid">
+          <div class="field field-full">
+            <label>申請者区分<span class="req">必須</span></label>
+            <div class="choice-grid employee-types" role="radiogroup" aria-label="申請者区分">
+              <label class="choice-card"><input type="radio" name="employeeType" value="従業員" required><span>従業員</span></label>
+              <label class="choice-card"><input type="radio" name="employeeType" value="定時従業員" required><span>定時従業員</span></label>
+              <label class="choice-card"><input type="radio" name="employeeType" value="アルバイト" required><span>アルバイト</span></label>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="division">事業部<span class="req">必須</span></label>
+            <select class="select" id="division" name="division" required>
+              <option value="">選択してください</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="store">店・部門<span class="req">必須</span></label>
+            <select class="select" id="store" name="store" required disabled>
+              <option value="">事業部を選択してください</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="sectionCode">所属係<span class="req">必須</span></label>
+            <select class="select" id="sectionCode" name="sectionCode" required disabled>
+              <option value="">店・部門を選択してください</option>
+            </select>
+            <p class="field-note" id="sectionCodeNote">係コードは選択内容から自動登録されます。</p>
+          </div>
+          <div class="field">
+            <label for="applicantName">申請者名<span class="req">必須</span></label>
+            <input class="input" id="applicantName" name="applicantName" autocomplete="off" list="staffNameList" required>
+            <datalist id="staffNameList"></datalist>
+            <p class="field-note" id="applicantStaffHint"></p>
+          </div>
+          <div class="field">
+            <label for="applicationDate">申請日<span class="req">必須</span></label>
+            <input class="input" id="applicationDate" name="applicationDate" type="date" required>
+          </div>
+          <div class="field field-full">
+            <label for="approverSelect">承認者（上長が不在の場合のみ・任意）</label>
+            <select class="select" id="approverSelect">
+              <option value="">指定しない（対面で押印してもらう）</option>
+            </select>
+            <p class="field-note">選ぶと、送信時に承認者へメールで承認依頼が届きます（クリックすると承認成立）。申請者と同格以上の役職者のみ選べます。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="form-card">
+        <div class="card-title"><span>2</span><h2>出張内容</h2></div>
+        <div class="form-grid">
+          <div class="field">
+            <label for="travelDate">出張日<span class="req">必須</span></label>
+            <input class="input" id="travelDate" name="travelDate" type="date" required>
+          </div>
+          <div class="field">
+            <label for="businessDestination">出張先<span class="req">必須</span></label>
+            <input class="input" id="businessDestination" name="businessDestination" required placeholder="例：青山一丁目・取引先">
+          </div>
+          <div class="field field-full">
+            <label>目的<span class="req">必須</span></label>
+            <div class="choice-grid purpose-options" role="radiogroup" aria-label="目的">
+              <label class="choice-card"><input type="radio" name="purposeCategory" value="展示会" required><span>展示会</span></label>
+              <label class="choice-card"><input type="radio" name="purposeCategory" value="商談"><span>商談</span></label>
+              <label class="choice-card"><input type="radio" name="purposeCategory" value="買出"><span>買出</span></label>
+              <label class="choice-card"><input type="radio" name="purposeCategory" value="研修会"><span>研修会</span></label>
+              <label class="choice-card"><input type="radio" name="purposeCategory" value="応援"><span>応援</span></label>
+              <label class="choice-card"><input type="radio" name="purposeCategory" value="その他"><span>その他</span></label>
+            </div>
+          </div>
+          <div class="field field-full" id="purposeOtherWrap" hidden>
+            <label for="purposeOther">その他の具体的な内容<span class="req">必須</span></label>
+            <input class="input" id="purposeOther" placeholder="例：取引先との商談">
+          </div>
+        </div>
+      </section>
+
+      <section class="form-card">
+        <div class="card-title card-title--action">
+          <div><span>3</span><div><h2>移動区間　<button type="button" class="help-icon" id="routeHelpButton" aria-label="貼り付け方のヘルプを見る">？</button></h2><p>Yahoo!路線情報の検索結果を、区間ごとに検索して貼り付けてください（最大10区間）。</p></div></div>
+          <a class="btn btn-sub" href="https://transit.yahoo.co.jp/" target="_blank" rel="noopener">路線情報を開く</a>
+        </div>
+
+        <div id="segmentsContainer"></div>
+
+        <div class="action-row">
+          <button type="button" class="btn btn-sub" id="addSegmentButton">＋ 区間を追加</button>
+          <span class="field-note" id="segmentLimitNote"></span>
+        </div>
+      </section>
+
+      <dialog id="routeHelpDialog">
+        <div class="dialog-head"><h2>検索結果の貼り付け方</h2><button type="button" class="dialog-close" id="closeRouteHelp" aria-label="閉じる">×</button></div>
+        <div class="help-content">
+          <ol class="help-steps">
+            <li>
+              <strong>①「路線情報を開く」を押して、Yahoo!路線情報のページを開く</strong>
+              <p>出発地・到着地・日時を入力して検索してください。</p>
+            </li>
+            <li>
+              <strong>②検索結果から使うルートを1つ選ぶ</strong>
+              <p>複数の候補が出た場合は、実際に利用したルートを選んでください。</p>
+            </li>
+            <li>
+              <strong>③ルートの結果部分を範囲選択してコピーする</strong>
+              <p>ルート名（「ルート1」等）から、到着駅の表示まで、画面をドラッグして選択し、<kbd>Ctrl</kbd>+<kbd>C</kbd>（Macは<kbd>⌘</kbd>+<kbd>C</kbd>）でコピーしてください。</p>
+              <div class="help-example">
+ルート1
+19:49発→20:45着56分（乗車28分）
+乗換：3回
+IC優先：453円
+17.5km
+　
+19:49
+発　稲田堤
+　
+ＪＲ南武線 立川行
+　
+19:59着 20:04発　府中本町
+　
+　（…このように、乗換駅・利用路線・時刻がひと続きになっていればOK）
+　
+20:45
+着　中央大学附属高等学校
+              </div>
+            </li>
+            <li>
+              <strong>④このページに戻り、「検索結果を貼り付け」欄にペーストする</strong>
+              <p><kbd>Ctrl</kbd>+<kbd>V</kbd>（Macは<kbd>⌘</kbd>+<kbd>V</kbd>）で貼り付けると自動で解析されます。うまく取り込めなかった項目は、下の欄へ直接入力してください。</p>
+            </li>
+            <li>
+              <strong>⑤複数の経路がある場合は「＋区間を追加」</strong>
+              <p>乗り換えではなく、別々に検索した経路（例：自宅→A地点、A地点→B地点）がある場合は、区間を追加してそれぞれ貼り付けてください。</p>
+            </li>
+          </ol>
+        </div>
+        <div class="dialog-actions"><button type="button" class="btn btn-sub" id="closeRouteHelpBottom">閉じる</button></div>
+      </dialog>
+
+      <template id="segmentTemplate">
+        <div class="segment-card">
+          <div class="segment-card__head">
+            <strong class="segment-card__title"></strong>
+            <div class="segment-card__head-actions">
+              <button type="button" class="link-button seg-toggle">たたむ</button>
+              <button type="button" class="link-button seg-remove">この区間を削除</button>
+            </div>
+          </div>
+
+          <button type="button" class="segment-summary" hidden></button>
+
+          <div class="segment-body">
+            <div class="field field-full">
+              <label>検索結果を貼り付け<span class="req">必須</span></label>
+              <textarea class="seg-raw" rows="5" required placeholder="ここへ検索結果をそのまま貼り付け"></textarea>
+            </div>
+            <div class="action-row">
+              <button type="button" class="btn seg-parse">貼り付け内容を解析</button>
+              <button type="button" class="link-button seg-clear">この区間をクリア</button>
+            </div>
+            <div class="message message--caution seg-message" hidden></div>
+            <div class="form-grid route-edit">
+              <div class="field"><label>乗車地<span class="req">必須</span></label><input class="input seg-origin" required></div>
+              <div class="field"><label>降車地<span class="req">必須</span></label><input class="input seg-destination" required></div>
+              <div class="field field-full"><label>経由地<span class="req">必須</span></label><input class="input seg-via" required placeholder="例：稲田堤 → 登戸 → 代々木上原 → 表参道"><p class="field-note">有料交通機関の乗換地点だけを表示します。徒歩区間は除外します。直行の場合は「なし」と入力してください。</p></div>
+              <div class="field"><label>利用種別<span class="req">必須</span></label>
+                <select class="select seg-transport" required>
+                  <option value="">選択してください</option>
+                  <option value="鉄道">鉄道</option>
+                  <option value="バス">バス</option>
+                  <option value="鉄道・バス">鉄道・バス</option>
+                  <option value="その他">その他</option>
+                </select>
+              </div>
+              <div class="field field-narrow"><label>IC運賃（片道）<span class="req">必須</span></label><div class="money-input"><input class="input seg-fare" type="number" min="0" step="1" required><span>円</span></div></div>
+              <div class="field field-full"><label>利用路線（任意）</label><input class="input seg-route-line" placeholder="例：ＪＲ南武線 川崎行"><p class="field-note">解析結果から自動入力されます。空欄でも申請できます。</p></div>
+            </div>
+          </div>
+        </div>
+      </template>
+
+      <section class="form-card">
+        <div class="card-title"><span>4</span><h2>申請金額</h2></div>
+        <div class="choice-grid trip-options" role="radiogroup" aria-label="申請区分">
+          <label class="choice-card"><input type="radio" name="tripType" value="oneWay" checked><span>片道</span></label>
+          <label class="choice-card"><input type="radio" name="tripType" value="roundTrip"><span>同額往復</span></label>
+          <label class="choice-card"><input type="radio" name="tripType" value="custom"><span>金額を手修正</span></label>
+        </div>
+        <p class="field-note">IC運賃合計（全区間）：<strong id="fareSumView">0</strong>円</p>
+        <div class="amount-box"><span>申請額</span><div><strong id="claimedAmountView">0</strong><small>円</small></div></div>
+        <div class="field field-narrow" id="customAmountWrap" hidden><label for="customAmount">申請額を直接入力</label><div class="money-input"><input class="input" id="customAmount" type="number" min="0" step="1"><span>円</span></div></div>
+        <div class="field field-full"><label for="remarks">備考</label><textarea id="remarks" name="remarks" rows="3" placeholder="通常と異なる経路、タクシー利用等がある場合のみ記入"></textarea></div>
+      </section>
+
+      <section class="form-card final-card">
+        <label class="confirm-check"><input id="confirmCheck" type="checkbox" required><span>内容を確認し、通勤定期区間を除いたIC運賃であることを確認しました。</span></label>
+        <div class="submit-row">
+          <button type="button" class="btn btn-sub" id="previewButton">申請内容を確認</button>
+          <button type="submit" class="btn" id="submitButton">申請する</button>
+        </div>
+      </section>
+      <input type="text" name="website" id="website" class="honeypot" tabindex="-1" autocomplete="off">
+    </form>
+  </main>
+
+  <dialog id="previewDialog">
+    <div class="dialog-head"><h2>申請内容の確認</h2><button type="button" class="dialog-close" id="closePreview" aria-label="閉じる">×</button></div>
+    <div id="previewContent"></div>
+    <div class="dialog-actions">
+      <button type="button" class="btn btn-sub" id="printButton">印刷する</button>
+      <button type="button" class="btn btn-sub" id="closePreviewBottom">戻る</button>
+    </div>
+  </dialog>
+
+  <dialog id="completeDialog">
+    <div class="complete-panel">
+      <div class="complete-mark">✓</div>
+      <h2>申請を受け付けました</h2>
+      <p>受付番号</p>
+      <strong id="completeApplicationId">—</strong>
+      <p id="completeNote"></p>
+      <button type="button" class="btn btn-sub" id="printCompleteButton">印刷する</button>
+      <button type="button" class="btn" id="closeComplete">閉じる</button>
+    </div>
+  </dialog>
+
+  <!-- 印刷専用エリア（画面には出さず、印刷時だけ表示） -->
+  <div id="printArea" class="print-area" aria-hidden="true"></div>
+
+  <script src="./config.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
