@@ -125,6 +125,10 @@
     $('closePreview').addEventListener('click', () => previewDialog.close());
     $('closePreviewBottom').addEventListener('click', () => previewDialog.close());
     $('printButton').addEventListener('click', () => printData(formDataObject(), ''));
+    $('submitFromPreviewButton').addEventListener('click', () => {
+      previewDialog.close();
+      form.requestSubmit(); // 通常の「申請する」ボタンと同じsubmitイベントを発火させる
+    });
     $('printCompleteButton').addEventListener('click', () => printData(lastSubmittedData || formDataObject(), lastApplicationId));
     $('closeComplete').addEventListener('click', closeComplete);
     $('routeHelpButton').addEventListener('click', () => $('routeHelpDialog').showModal());
