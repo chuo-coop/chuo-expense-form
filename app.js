@@ -665,6 +665,23 @@
     const cell = text => {
       if (!text) return '';
       const size = fitFontSizeToWidth(text, ROUTE_CELL_WIDTH_PX);
+      const smallestTier = ROUTE_FONT_TIERS[ROUTE_FONT_TIERS.length - 1];
+      // 最小フォントでも収まらない極端に長いテキストは、overflow:hiddenで
+      // 中途半端に見切れるより、省略記号（…）で明示的に切った方が壊れて見えない。
+      if (size === smallestTier) {
+        let ctx = null;
+        try { ctx = document.createElement('canvas').getContext('2d'); } catch (e) { ctx = null; }
+        if (ctx) {
+          ctx.font = `${smallestTier}px "Noto Sans JP","Yu Gothic",sans-serif`;
+          if (ctx.measureText(text).width > ROUTE_CELL_WIDTH_PX) {
+            let clipped = text;
+            while (clipped.length > 1 && ctx.measureText(clipped + '…').width > ROUTE_CELL_WIDTH_PX) {
+              clipped = clipped.slice(0, -1);
+            }
+            return `<span style="font-size:${smallestTier}px;">${escapeHtml(clipped)}…</span>`;
+          }
+        }
+      }
       return `<span style="font-size:${size}px;">${escapeHtml(text)}</span>`;
     };
     return Array.from({ length: rowCount }, (_, i) => `
@@ -787,9 +804,26 @@
     return response.json();
   }
 
+  function showSubmitError(message) {
+    const banner = $('submitErrorBanner');
+    // Google側の内部エラー（英語・権限スコープ等の技術的な文言）はそのまま出さず、
+    // 分かりやすい日本語に置き換える。それ以外（こちらで投げているバリデーションエラー等）はそのまま表示する。
+    const friendly = /does not have permission|Required permissions|googleapis\.com/i.test(message || '')
+      ? '送信処理でシステム側のエラーが発生しました。時間をおいて再度お試しいただくか、情報通信課へご連絡ください。'
+      : (message || '送信中にエラーが発生しました。');
+    banner.textContent = friendly;
+    banner.hidden = false;
+    banner.scrollIntoView?.({ behavior: 'smooth', block: 'center' });
+  }
+
+  function hideSubmitError() {
+    $('submitErrorBanner').hidden = true;
+  }
+
   async function handleSubmit(event) {
     event.preventDefault();
     if (!form.reportValidity()) return;
+    hideSubmitError();
     submitButton.disabled = true;
     saveState.textContent = '送信中';
     try {
@@ -807,7 +841,7 @@
     } catch (error) {
       saveState.textContent = '送信失敗';
       submitButton.disabled = false;
-      alert(error.message || '送信中にエラーが発生しました。');
+      showSubmitError(error.message);
     }
   }
 
