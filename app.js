@@ -89,7 +89,8 @@
       $('division').value = saved.division || '';
       populateStores(saved.store || '');
       populateSections(saved.sectionCode || '');
-      $('applicantName').value = saved.applicantName || '';
+      // 申請者名は復元しない：共有端末で複数人が使い回す運用のため、
+      // 前回の人の名前が残ったまま次の人が誤って送信する事故を避ける。
     } catch (_) {
       // 保存値が壊れていても申請画面は継続する。
     }
@@ -741,15 +742,29 @@
   async function fetchStaffDirectory() {
     const endpoint = window.APP_CONFIG?.GAS_ENDPOINT;
     if (!endpoint) return []; // GAS未設定時（デモ環境）は名簿なしとして動く
-    try {
-      const response = await fetch(`${endpoint}?action=staffDirectory`);
-      if (!response.ok) return [];
-      const result = await response.json();
-      return result.ok ? result.staff : [];
-    } catch (error) {
-      console.error('名簿の取得に失敗しました', error);
-      return [];
-    }
+    // GASのWebアプリはGETリクエストへのCORSヘッダーが安定しないため、
+    // <script>タグ経由のJSONPで取得する（CORSの制約を受けない）。
+    return new Promise(resolve => {
+      const callbackName = `staffDirectoryCallback_${Date.now()}`;
+      const script = document.createElement('script');
+      let settled = false;
+
+      const finish = staff => {
+        if (settled) return;
+        settled = true;
+        delete window[callbackName];
+        script.remove();
+        clearTimeout(timer);
+        resolve(staff);
+      };
+
+      window[callbackName] = result => finish(result && result.ok ? result.staff : []);
+      script.onerror = () => { console.error('名簿の取得に失敗しました（JSONP読み込みエラー）'); finish([]); };
+      const timer = setTimeout(() => { console.error('名簿の取得がタイムアウトしました'); finish([]); }, 10000);
+
+      script.src = `${endpoint}?action=staffDirectory&callback=${callbackName}`;
+      document.head.appendChild(script);
+    });
   }
 
   async function submitToGas(data) {
@@ -798,8 +813,7 @@
       employeeType: document.querySelector('input[name="employeeType"]:checked')?.value || '',
       division: $('division').value,
       store: $('store').value,
-      sectionCode: $('sectionCode').value,
-      applicantName: $('applicantName').value
+      sectionCode: $('sectionCode').value
     };
     form.reset();
     $('applicationDate').value = new Date().toISOString().slice(0, 10);
@@ -807,8 +821,9 @@
     $('division').value = applicant.division;
     populateStores(applicant.store);
     populateSections(applicant.sectionCode);
-    $('applicantName').value = applicant.applicantName;
-    updateApplicantStaffHint(); // .valueへの直接代入はinputイベントを発火しないため、明示的に呼び直す
+    // 申請者名はあえて復元しない（共有端末で次の人が別人の名前のまま送信する事故を防ぐため）。
+    // 事業部・店・係・申請者区分は変更頻度が低いので、利便性のため引き続き復元する。
+    updateApplicantStaffHint(); // 氏名が空になった状態に合わせて、承認者欄・ヒントをリセットする
     resetSegments();
     saveState.textContent = '入力中';
     submitButton.disabled = false;
