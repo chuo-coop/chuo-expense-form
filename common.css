@@ -31,6 +31,13 @@
   padding: 0;
 }
 
+/* HTML標準のhidden属性は、.field（display:flex）等のクラス指定に負けて
+   非表示にならないことがある。目的「その他」欄などが選択前から見えてしまう
+   不具合の原因だったため、hidden属性を最優先で効かせるようにする。 */
+[hidden] {
+  display: none !important;
+}
+
 html {
   scroll-behavior: smooth;
 }
