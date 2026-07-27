@@ -835,6 +835,63 @@
     });
   }
 
+  // 隠しiframe＋フォームでPOSTする。ブラウザの「フォーム送信（ページ遷移）」は
+  // fetchと違ってCORSの制約を受けないため、確実に届く。ただしその代わり、
+  // レスポンス本文は読めない（iframeの中身はクロスオリジンなので取得不可）。
+  function postViaHiddenForm(endpoint, payloadJson) {
+    return new Promise(resolve => {
+      const frameName = `gasSubmitFrame_${Date.now()}`;
+      const iframe = document.createElement('iframe');
+      iframe.name = frameName;
+      iframe.style.display = 'none';
+      document.body.appendChild(iframe);
+
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = endpoint;
+      form.target = frameName;
+      form.style.display = 'none';
+
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'payload';
+      input.value = payloadJson;
+      form.appendChild(input);
+      document.body.appendChild(form);
+
+      // iframeのload完了は「GASから何らかの応答が返ってきた」タイミングの目安にはなるが、
+      // 中身は読めないので、これ単独では成功/失敗の判定に使わない
+      // （本当の確認はJSONPのcheckSubmissionで行う）。
+      iframe.addEventListener('load', () => {
+        setTimeout(() => { form.remove(); iframe.remove(); }, 500);
+        resolve();
+      }, { once: true });
+
+      form.submit();
+    });
+  }
+
+  // GET（JSONP、CORSの制約を受けない）で、実際にclientTokenの申請が
+  // スプレッドシートに保存されたかを確認する。「見なし」ではなく実際の確認。
+  function checkSubmissionStatus(endpoint, clientToken) {
+    return new Promise(resolve => {
+      const callbackName = `checkSubmissionCallback_${Date.now()}`;
+      const script = document.createElement('script');
+      let settled = false;
+      const finish = result => {
+        if (settled) return;
+        settled = true;
+        delete window[callbackName];
+        script.remove();
+        resolve(result && result.ok ? result : { found: false });
+      };
+      window[callbackName] = result => finish(result);
+      script.onerror = () => finish({ found: false });
+      script.src = `${endpoint}?action=checkSubmission&clientToken=${encodeURIComponent(clientToken)}&callback=${callbackName}`;
+      document.head.appendChild(script);
+    });
+  }
+
   async function submitToGas(data) {
     const endpoint = window.APP_CONFIG?.GAS_ENDPOINT;
     if (!endpoint) {
@@ -842,13 +899,37 @@
       localStorage.setItem('travelExpense.lastDemoSubmission', JSON.stringify({ id, data }));
       return { ok: true, applicationId: id, demo: true };
     }
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'submitTravelExpense', payload: data })
-    });
-    if (!response.ok) throw new Error(`送信に失敗しました（${response.status}）`);
-    return response.json();
+
+    const payloadJson = JSON.stringify({ action: 'submitTravelExpense', payload: data });
+
+    try {
+      // 通常はfetchで送信・応答の両方を読む（バリデーションエラー等の詳細な
+      // メッセージもここでそのまま受け取れる）。
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: payloadJson
+      });
+      if (!response.ok) throw new Error(`送信に失敗しました（${response.status}）`);
+      return await response.json();
+    } catch (fetchError) {
+      // fetchでの送信、または応答の読み取り（GAS特有のCORSの揺らぎ）に失敗した場合の保険。
+      // GAS側の処理自体は完了していることが多いため、まずは「見なし」ではなく
+      // JSONP（CORSの制約を受けない）で実際に保存されたかを確認する。
+      console.error('fetch送信でエラーが発生したため、保存状況を別ルートで確認します', fetchError);
+      let status = await checkSubmissionStatus(endpoint, data.clientToken);
+      if (!status.found) {
+        // まだ保存が確認できない場合だけ、隠しフォームで念のため送信し直す
+        // （clientTokenが同じなので、二重に保存されることはない）。
+        await postViaHiddenForm(endpoint, payloadJson);
+        for (let attempt = 0; attempt < 15 && !status.found; attempt++) {
+          await new Promise(r => setTimeout(r, 1000));
+          status = await checkSubmissionStatus(endpoint, data.clientToken);
+        }
+      }
+      if (status.found) return { ok: true, applicationId: status.applicationId };
+      throw new Error('送信の確認が取れませんでした。ネットワークの状態を確認し、時間をおいて再度お試しください。');
+    }
   }
 
   function showSubmitError(message) {
