@@ -11,7 +11,7 @@
   const previewDialog = $('previewDialog');
   const completeDialog = $('completeDialog');
   const saveState = $('saveState');
-  const submitButton = $('submitButton');
+  const submitButton = $('submitFromPreviewButton');
   const MAX_SEGMENTS = 10;
   let clientToken = '';
   let segmentSeq = 0;
