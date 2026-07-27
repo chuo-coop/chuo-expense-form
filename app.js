@@ -305,17 +305,23 @@
         || /^\d+駅$/u.test(line)
         || /^[\d,]+円$/u.test(line)                 // 区間運賃（別途fareとして拾う）
         || /^\d{1,2}:\d{2}$/u.test(line)             // 単独の時刻表記
-        || /(運転見合わせ|列車遅延|運休|人身事故|信号確認|運行情報)/u.test(line) // 部分一致でも拾う（重複表示されることがあるため）
+        || /(運転見合わせ|列車遅延|運転状況|運休|人身事故|信号確認|運行情報)/u.test(line) // 部分一致でも拾う（重複表示されることがあるため）
         || /^ルート\d+$/u.test(line)
         || /^(早|安|楽|早楽|安楽|ルート保存|定期券|ルート共有|印刷する|チケット予約|座席選択|きっぷ購入)$/u.test(line)
         || /^(指定席|自由席|グリーン車|普通車指定席|普通車自由席)[：:]/u.test(line) // 座席種別ごとの運賃内訳（別途fareとして拾う）
         || /発→.*着.*分/u.test(line);                // ヘッダーのサマリー行
     },
 
+    // 同一内容の行が連続しているものは1行にまとめる（未知のUI表示要素が
+    // 重複表示されるケースへの汎用対策。個別にノイズ登録していなくても軽減できる）。
+    dedupeConsecutive(lines) {
+      return lines.filter((line, i) => i === 0 || line !== lines[i - 1]);
+    },
+
     isWalk(line) { return /徒歩/u.test(line); },
 
     classifyBlock(blockLines) {
-      const content = blockLines.filter(l => !this.isNoise(l));
+      const content = this.dedupeConsecutive(blockLines.filter(l => !this.isNoise(l)));
       if (content.some(l => this.isWalk(l))) return { type: 'walk' };
       const fareLine = blockLines.find(l => /^[\d,]+円$/u.test(l));
       const fare = fareLine ? Number(fareLine.replace(/[^\d]/g, '')) : null;
