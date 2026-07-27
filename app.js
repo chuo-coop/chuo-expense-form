@@ -3,9 +3,11 @@
 
   const ORGANIZATION_MASTER = [{"code":"001100","section":"書籍","division":"多摩店舗事業部","store":"物販店"},{"code":"001200","section":"外売","division":"多摩店舗事業部","store":"物販店"},{"code":"001400","section":"図書館","division":"多摩店舗事業部","store":"物販店"},{"code":"001900","section":"市ヶ谷田町","division":"都心店舗事業部","store":"都心店舗"},{"code":"002200","section":"購買","division":"多摩店舗事業部","store":"物販店"},{"code":"002300","section":"私厚連運営","division":"総務部","store":"情報通信"},{"code":"002500","section":"派遣","division":"多摩店舗事業部","store":"物販店"},{"code":"002900","section":"店舗管理","division":"多摩店舗事業部","store":"物販店"},{"code":"003110","section":"軽食","division":"食堂事業部","store":"多摩食堂"},{"code":"003210","section":"1階食堂","division":"食堂事業部","store":"多摩食堂"},{"code":"003220","section":"2階食堂","division":"食堂事業部","store":"多摩食堂"},{"code":"003230","section":"和おん","division":"食堂事業部","store":"多摩食堂"},{"code":"003240","section":"日和","division":"食堂事業部","store":"多摩食堂"},{"code":"003290","section":"調理","division":"食堂事業部","store":"多摩食堂"},{"code":"003310","section":"喫茶","division":"食堂事業部","store":"多摩食堂"},{"code":"003330","section":"四季","division":"食堂事業部","store":"多摩食堂"},{"code":"003400","section":"杉並高校食堂","division":"食堂事業部","store":"都心食堂"},{"code":"003500","section":"附属高校食堂","division":"食堂事業部","store":"都心食堂"},{"code":"003510","section":"附属中学食堂","division":"食堂事業部","store":"都心食堂"},{"code":"003600","section":"理工 3号館食堂","division":"食堂事業部","store":"都心食堂"},{"code":"003700","section":"理工 5号館食堂","division":"食堂事業部","store":"都心食堂"},{"code":"003800","section":"横浜中学高校食堂","division":"食堂事業部","store":"都心食堂"},{"code":"003900","section":"食堂管理","division":"食堂事業部","store":"食堂管理"},{"code":"004000","section":"教育","division":"多摩店舗事業部","store":"サービス店"},{"code":"004100","section":"旅行国内","division":"多摩店舗事業部","store":"サービス店"},{"code":"004150","section":"旅行海外","division":"多摩店舗事業部","store":"サービス店"},{"code":"004200","section":"印刷","division":"多摩店舗事業部","store":"サービス店"},{"code":"004300","section":"通販","division":"多摩店舗事業部","store":"サービス店"},{"code":"004400","section":"理工","division":"都心店舗事業部","store":"理工店"},{"code":"004500","section":"杉並高校売店","division":"都心店舗事業部","store":"中高店"},{"code":"004600","section":"附属中学高校売店","division":"都心店舗事業部","store":"中高店"},{"code":"004700","section":"不動産","division":"不動産事業部","store":"不動産"},{"code":"004800","section":"横浜中学高校売店","division":"都心店舗事業部","store":"中高店"},{"code":"004900","section":"茗荷谷","division":"都心店舗事業部","store":"茗荷谷店"},{"code":"005100","section":"検収","division":"多摩店舗事業部","store":"物販店"},{"code":"005200","section":"情報通信","division":"総務部","store":"情報通信"},{"code":"005300","section":"庶務","division":"総務部","store":"総務"},{"code":"005400","section":"経理","division":"総務部","store":"総務"},{"code":"005500","section":"本部","division":"総務部","store":"総務"},{"code":"005600","section":"機関運営","division":"総務部","store":"総務"},{"code":"005700","section":"共済","division":"総務部","store":"共済"},{"code":"005800","section":"衛生管理","division":"総務部","store":"総務"},{"code":"005910","section":"学園中央開発","division":"不動産事業部","store":"不動産"},{"code":"005920","section":"学園中央開発","division":"不動産事業部","store":"施設管理"},{"code":"005930","section":"学園中央開発施設管理","division":"不動産事業部","store":"施設管理"},{"code":"006000","section":"新入生対応","division":"多摩店舗事業部","store":"情報通信"}];
 
+  // 事業部の表示順は五十音順ではなく、指定の並び順（多摩→都心→食堂→不動産→総務）に固定する。
+  const DIVISION_ORDER = ['多摩', '都心', '食堂', '不動産', '総務'];
+
   const $ = id => document.getElementById(id);
   const form = $('expenseForm');
-  const customAmount = $('customAmount');
   const previewDialog = $('previewDialog');
   const completeDialog = $('completeDialog');
   const saveState = $('saveState');
@@ -22,18 +24,33 @@
     const today = new Date().toISOString().slice(0, 10);
     $('applicationDate').value ||= today;
     restoreApplicant();
+    updateApplicantNameAvailability();
     addSegment(); // 初期表示は1区間
     bindEvents();
     calculateAmount();
 
     staffDirectory = await fetchStaffDirectory();
     populateStaffNameList();
+    updateApplicantNameAvailability();
     updateApplicantStaffHint();
     populateApproverOptions();
   }
 
   function uniqueSorted(values) {
     return [...new Set(values.filter(Boolean))].sort((a, b) => a.localeCompare(b, 'ja'));
+  }
+
+  // 事業部の表示順は五十音順ではなく、指定の並び順（多摩→都心→食堂→不動産→総務）に固定する。
+  function sortDivisions(values) {
+    const unique = [...new Set(values.filter(Boolean))];
+    return unique.sort((a, b) => {
+      const ai = DIVISION_ORDER.findIndex(key => a.includes(key));
+      const bi = DIVISION_ORDER.findIndex(key => b.includes(key));
+      if (ai === -1 && bi === -1) return a.localeCompare(b, 'ja');
+      if (ai === -1) return 1;
+      if (bi === -1) return -1;
+      return ai - bi;
+    });
   }
 
   function setSelectOptions(select, placeholder, values) {
@@ -47,7 +64,7 @@
   }
 
   function populateDivisions() {
-    setSelectOptions($('division'), '選択してください', uniqueSorted(ORGANIZATION_MASTER.map(row => row.division)));
+    setSelectOptions($('division'), '選択してください', sortDivisions(ORGANIZATION_MASTER.map(row => row.division)));
     populateStores();
   }
 
@@ -107,14 +124,13 @@
   }
 
   function bindEvents() {
-    $('division').addEventListener('change', () => { populateStores(); populateStaffNameList(); });
-    $('store').addEventListener('change', () => populateSections());
+    $('division').addEventListener('change', () => { populateStores(); populateStaffNameList(); updateApplicantNameAvailability(); });
+    $('store').addEventListener('change', () => { populateSections(); populateStaffNameList(); updateApplicantNameAvailability(); });
     $('sectionCode').addEventListener('change', updateSectionNote);
     $('addSegmentButton').addEventListener('click', () => addSegment());
     document.querySelectorAll('input[name="purposeCategory"]').forEach(el => el.addEventListener('change', updatePurposeOtherVisibility));
     $('applicantName').addEventListener('input', updateApplicantStaffHint);
-    document.querySelectorAll('input[name="employeeType"]').forEach(el => el.addEventListener('change', updateApplicantStaffHint));
-    customAmount.addEventListener('input', calculateAmount);
+    document.querySelectorAll('input[name="employeeType"]').forEach(el => el.addEventListener('change', () => { updateApplicantNameAvailability(); updateApplicantStaffHint(); }));
     document.querySelectorAll('input[name="tripType"]').forEach(el => el.addEventListener('change', calculateAmount));
 
     $('previewButton').addEventListener('click', () => {
@@ -124,12 +140,18 @@
     });
     $('closePreview').addEventListener('click', () => previewDialog.close());
     $('closePreviewBottom').addEventListener('click', () => previewDialog.close());
-    $('printButton').addEventListener('click', () => printData(formDataObject(), ''));
+    $('openPrintDialogButton').addEventListener('click', () => openPrintDialog(formDataObject(), ''));
     $('submitFromPreviewButton').addEventListener('click', () => {
       previewDialog.close();
       form.requestSubmit(); // 通常の「申請する」ボタンと同じsubmitイベントを発火させる
     });
-    $('printCompleteButton').addEventListener('click', () => printData(lastSubmittedData || formDataObject(), lastApplicationId));
+    $('printCompleteButton').addEventListener('click', () => openPrintDialog(lastSubmittedData || formDataObject(), lastApplicationId));
+    $('closePrintDialog').addEventListener('click', () => $('printDialog').close());
+    $('closePrintDialogBottom').addEventListener('click', () => $('printDialog').close());
+    $('doPrintButton').addEventListener('click', () => {
+      $('printDialog').close();
+      printData(pendingPrintContext.data, pendingPrintContext.applicationId, $('showApplicantSealCheck').checked);
+    });
     $('closeComplete').addEventListener('click', closeComplete);
     $('routeHelpButton').addEventListener('click', () => $('routeHelpDialog').showModal());
     $('closeRouteHelp').addEventListener('click', () => $('routeHelpDialog').close());
@@ -158,14 +180,30 @@
      ============================================================ */
 
   function populateStaffNameList() {
-    const divisionText = $('division').value;
-    // 選択中の事業部と部課名がゆるく一致する人だけに絞る（例：「多摩店舗事業部」⊇「多摩」）。
+    const storeText = $('store').value;
+    // 選択中の「店・部門」と名簿の「所属」がゆるく一致する人だけに絞る。
     // 該当者が1人もいない場合は絞り込まず全員を出す（表記のズレで候補が消えてしまうのを避けるため）。
-    const filtered = divisionText
-      ? staffDirectory.filter(s => divisionText.includes(s.department) || s.department.includes(divisionText))
+    const filtered = storeText
+      ? staffDirectory.filter(s => storeText.includes(s.affiliation) || (s.affiliation || '').includes(storeText))
       : staffDirectory;
     const list = filtered.length ? filtered : staffDirectory;
     $('staffNameList').innerHTML = list.map(s => `<option value="${escapeHtml(s.name)}"></option>`).join('');
+  }
+
+  // 従業員区分のときは、所属（店・部門）を選ぶまで申請者名欄を使わせない
+  // （定時従業員・アルバイトはそもそも名簿に載っていない前提なので対象外）。
+  function updateApplicantNameAvailability() {
+    const employeeType = document.querySelector('input[name="employeeType"]:checked')?.value || '';
+    const storeSelected = Boolean($('store').value);
+    const shouldLock = employeeType === '従業員' && !storeSelected;
+
+    $('applicantName').disabled = shouldLock;
+    if (shouldLock) {
+      $('applicantName').placeholder = '先に事業部・店を選択してください';
+      $('applicantName').value = '';
+    } else {
+      $('applicantName').placeholder = '';
+    }
   }
 
   function currentApplicantStaff() {
@@ -180,7 +218,7 @@
     const mismatchWarning = employeeType === '従業員' && nameEntered && !staff && staffDirectory.length > 0;
 
     if (staff) {
-      $('applicantStaffHint').textContent = `名簿に一致：${staff.department}／${staff.title}（ランク${staff.rank}）`;
+      $('applicantStaffHint').textContent = `名簿に一致：${staff.affiliation || staff.department}（ランク${staff.rank}）`;
       $('applicantStaffHint').classList.remove('field-note--warning');
     } else if (mismatchWarning) {
       $('applicantStaffHint').textContent = '名簿と一致しません。承認者機能を使うには、名簿の表記（スペース等）に合わせて入力してください。';
@@ -208,7 +246,7 @@
       .sort((a, b) => b.rank - a.rank || a.name.localeCompare(b.name, 'ja'));
 
     select.innerHTML = '<option value="">指定しない（対面で押印してもらう）</option>'
-      + candidates.map(s => `<option value="${escapeHtml(s.name)}">${escapeHtml(s.name)}　${escapeHtml(s.department)}／${escapeHtml(s.title)}</option>`).join('');
+      + candidates.map(s => `<option value="${escapeHtml(s.name)}">${escapeHtml(s.surname)}　${escapeHtml(s.affiliation || s.department)}</option>`).join('');
 
     if (candidates.some(s => s.name === currentValue)) select.value = currentValue;
   }
@@ -289,7 +327,13 @@
       const lineName = (content.length > 1 && /行$/u.test(content[content.length - 1])
         ? content.slice(0, -1)
         : content
-      ).map(l => l.replace(/^(ＪＲ|JR)/u, '')).join(' ');
+      ).map(l => l
+        .replace(/^(ＪＲ|JR)/u, '')
+        // 新幹線の列車愛称＋号数（例：「こだま839号」）は路線名ではないので除く。
+        .replace(/(のぞみ|ひかり|こだま|はやぶさ|こまち|つばさ|やまびこ|なすの|とき|たにがわ|かがやき|はくたか|つるぎ|さくら|みずほ|つばめ)\d*号?$/u, '')
+        // 「特急」「急行」等の種別も路線名の一部ではないので末尾から除く。
+        .replace(/(特別快速|通勤特快|通勤快速|中央特快|青梅特快|快速急行|区間急行|区間快速|新快速|特急|急行|快速|準急|各停|普通)$/u, '')
+      ).join(' ').replace(/\s+/gu, ' ').trim();
       return { type, fare, line: lineName };
     },
 
@@ -429,10 +473,20 @@
     toggleBtn.addEventListener('click', () => setSegmentCollapsed(card, !card.classList.contains('is-collapsed')));
     summaryBtn.addEventListener('click', () => setSegmentCollapsed(card, false));
     fareInput.addEventListener('input', () => { calculateAmount(); refreshSegmentSummaryText(card); });
+    card.querySelector('.seg-transport').addEventListener('change', () => updateSegmentOtherVisibility(card));
     ['seg-origin', 'seg-destination', 'seg-transport'].forEach(cls => {
       card.querySelector(`.${cls}`).addEventListener('input', () => refreshSegmentSummaryText(card));
       card.querySelector(`.${cls}`).addEventListener('change', () => refreshSegmentSummaryText(card));
     });
+  }
+
+  function updateSegmentOtherVisibility(card) {
+    const isOther = card.querySelector('.seg-transport').value === 'その他';
+    const wrap = card.querySelector('.seg-other-wrap');
+    const detail = card.querySelector('.seg-other-detail');
+    wrap.hidden = !isOther;
+    detail.required = isOther;
+    if (!isOther) detail.value = '';
   }
 
   function segmentSummaryText(card) {
@@ -473,6 +527,7 @@
     if (result.transportType) card.querySelector('.seg-transport').value = result.transportType;
     if (result.fare != null) card.querySelector('.seg-fare').value = result.fare;
     if (result.routeLines) card.querySelector('.seg-route-line').value = result.routeLines;
+    updateSegmentOtherVisibility(card);
 
     const missing = [];
     if (!result.origin) missing.push('乗車地');
@@ -498,9 +553,10 @@
   function clearSegment(card) {
     card.querySelector('.seg-raw').value = '';
     card.querySelector('.seg-message').hidden = true;
-    ['seg-origin', 'seg-destination', 'seg-via', 'seg-transport', 'seg-fare', 'seg-route-line'].forEach(cls => {
+    ['seg-origin', 'seg-destination', 'seg-via', 'seg-transport', 'seg-fare', 'seg-route-line', 'seg-other-detail'].forEach(cls => {
       card.querySelector(`.${cls}`).value = '';
     });
+    updateSegmentOtherVisibility(card);
     setSegmentCollapsed(card, false);
     calculateAmount();
   }
@@ -521,10 +577,7 @@
     const fareSum = segmentFareSum();
     $('fareSumView').textContent = fareSum.toLocaleString();
     const tripType = document.querySelector('input[name="tripType"]:checked').value;
-    let amount = fareSum;
-    if (tripType === 'roundTrip') amount = fareSum * 2;
-    if (tripType === 'custom') amount = Number(customAmount.value || 0);
-    $('customAmountWrap').hidden = tripType !== 'custom';
+    const amount = tripType === 'roundTrip' ? fareSum * 2 : fareSum;
     $('claimedAmountView').textContent = amount.toLocaleString();
     return amount;
   }
@@ -537,6 +590,7 @@
       transportType: card.querySelector('.seg-transport').value,
       icFare: Number(card.querySelector('.seg-fare').value || 0),
       routeLine: card.querySelector('.seg-route-line').value.trim(),
+      otherDetail: card.querySelector('.seg-other-detail').value.trim(),
       routeRawText: card.querySelector('.seg-raw').value
     }));
   }
@@ -581,7 +635,9 @@
       icFare: segmentFareSum(),
       tripType: document.querySelector('input[name="tripType"]:checked').value,
       claimedAmount: calculateAmount(),
-      remarks: $('remarks').value.trim(),
+      // グローバルな備考欄は廃止したため、区間ごとの「その他」の内容から自動生成する
+      // （スプレッドシートの「備考」列との後方互換のため）。
+      remarks: segments.map((s, i) => s.otherDetail ? `区間${i + 1}：${s.otherDetail}` : '').filter(Boolean).join('／'),
       website: $('website').value,
       clientToken: clientToken || (clientToken = makeClientToken()),
       submittedAt: new Date().toISOString(),
@@ -619,6 +675,12 @@
   }
 
   let lastApplicationId = '';
+  let pendingPrintContext = { data: null, applicationId: '' };
+
+  function openPrintDialog(data, applicationId) {
+    pendingPrintContext = { data, applicationId };
+    $('printDialog').showModal();
+  }
   let lastSubmittedData = null;
 
   const PURPOSE_CATEGORIES = ['展示会', '商談', '買出', '研修会', '応援'];
@@ -633,67 +695,29 @@
     return `${mainParts}・${wrap('その他', otherSelected)}（${otherDetail}）`;
   }
 
-  const ROUTE_CELL_WIDTH_PX = 300; // 経路欄1列分の実効幅の見積り（余白込みで少し余裕を持たせる）
-  const ROUTE_FONT_TIERS = [12, 11, 10, 9, 8, 7];
-
-  // 文字幅を実測し、1行に収まる最大のフォントサイズを選ぶ（canvasが使えない環境では
-  // 全角2・半角1の簡易換算にフォールバックする）。行の高さを文字量で変えないための仕組み。
-  function fitFontSizeToWidth(text, maxWidthPx) {
-    let ctx = null;
-    try {
-      ctx = document.createElement('canvas').getContext('2d');
-    } catch (e) { ctx = null; }
-    for (const size of ROUTE_FONT_TIERS) {
-      let width;
-      if (ctx) {
-        ctx.font = `${size}px "Noto Sans JP","Yu Gothic",sans-serif`;
-        width = ctx.measureText(text).width;
-      } else {
-        const units = [...text].reduce((sum, ch) => sum + (ch.codePointAt(0) > 0x7F ? 2 : 1), 0);
-        width = units * (size * 0.5);
-      }
-      if (width <= maxWidthPx) return size;
-    }
-    return ROUTE_FONT_TIERS[ROUTE_FONT_TIERS.length - 1];
+  function routeRowsHtml(data) {
+    return data.segments.map((s, i) => {
+      const routePrefix = data.tripType === 'roundTrip' ? '（往復）' : '';
+      const routeLine = `${routePrefix}${s.origin}${s.viaStations && s.viaStations !== 'なし' ? '～' + s.viaStations.replace(/\s*→\s*/gu, '～') : ''}～${s.destination}`;
+      const usedLines = s.routeLine ? s.routeLine.replace(/\s*→\s*/gu, '/') : '';
+      const otherLine = s.transportType === 'その他' && s.otherDetail ? `その他：${s.otherDetail}` : '';
+      return `
+        <div class="print-segment-block">
+          <div class="print-segment-route">区間：${escapeHtml(routeLine)}</div>
+          ${usedLines ? `<div class="print-segment-line">利用路線：${escapeHtml(usedLines)}</div>` : ''}
+          ${otherLine ? `<div class="print-segment-line">${escapeHtml(otherLine)}</div>` : ''}
+        </div>
+      `;
+    }).join('');
   }
 
-  function routeRowsHtml(data) {
-    const routeLines = data.segments.map(s => `${s.origin}～${s.destination}${s.routeLine ? `（${s.routeLine}）` : ''}`);
-    const rowCount = Math.max(4, Math.ceil(routeLines.length / 2));
-    const leftLines = routeLines.slice(0, rowCount);
-    const rightLines = routeLines.slice(rowCount);
-    const cell = text => {
-      if (!text) return '';
-      const size = fitFontSizeToWidth(text, ROUTE_CELL_WIDTH_PX);
-      const smallestTier = ROUTE_FONT_TIERS[ROUTE_FONT_TIERS.length - 1];
-      // 最小フォントでも収まらない極端に長いテキストは、overflow:hiddenで
-      // 中途半端に見切れるより、省略記号（…）で明示的に切った方が壊れて見えない。
-      if (size === smallestTier) {
-        let ctx = null;
-        try { ctx = document.createElement('canvas').getContext('2d'); } catch (e) { ctx = null; }
-        if (ctx) {
-          ctx.font = `${smallestTier}px "Noto Sans JP","Yu Gothic",sans-serif`;
-          if (ctx.measureText(text).width > ROUTE_CELL_WIDTH_PX) {
-            let clipped = text;
-            while (clipped.length > 1 && ctx.measureText(clipped + '…').width > ROUTE_CELL_WIDTH_PX) {
-              clipped = clipped.slice(0, -1);
-            }
-            return `<span style="font-size:${smallestTier}px;">${escapeHtml(clipped)}…</span>`;
-          }
-        }
-      }
-      return `<span style="font-size:${size}px;">${escapeHtml(text)}</span>`;
-    };
-    return Array.from({ length: rowCount }, (_, i) => `
-      <tr>
-        <td class="print-route-cell">${cell(leftLines[i])}</td>
-        <td class="print-route-cell">${cell(rightLines[i])}</td>
-      </tr>
-    `).join('');
+  function sealHtml(surname) {
+    if (!surname) return '';
+    return `<span class="print-seal">${escapeHtml(surname)}</span>`;
   }
 
   // 1部（申請用 or 係控え）ぶんのHTMLを組み立てる。上下で内容は完全に同一。
-  function buildCopyHtml(data, applicationId, copyLabel) {
+  function buildCopyHtml(data, applicationId, copyLabel, showApplicantSeal) {
     const today = new Date();
     const dateText = `${today.getFullYear()}年${today.getMonth() + 1}月${today.getDate()}日`;
     return `
@@ -714,19 +738,15 @@
             <td class="print-lbl">目　的</td>
             <td class="print-val" colspan="3">${purposeLineHtml(data)}</td>
           </tr>
-          <tr>
-            <td class="print-lbl">内　容</td>
-            <td class="print-val" colspan="3">${escapeHtml(data.remarks || '')}</td>
-          </tr>
         </table>
 
-        <table class="print-table print-routes">
+        <div class="print-segment-list">
           ${routeRowsHtml(data)}
-        </table>
+        </div>
 
         <table class="print-table print-lower-table">
           <tr>
-            <td class="print-stamp-cell">認印<div class="print-stamp-box"></div></td>
+            <td class="print-stamp-cell">認印<div class="print-stamp-box">${showApplicantSeal ? sealHtml(applicantSurname(data)) : ''}</div></td>
             <td class="print-stamp-cell">経理<div class="print-stamp-box"></div></td>
             <td class="print-stamp-cell">所属上長<div class="print-stamp-box"></div></td>
             <td class="print-amount-cell">
@@ -742,21 +762,27 @@
     `;
   }
 
-  function buildPrintArea(data, applicationId) {
+  function applicantSurname(data) {
+    const staff = staffDirectory.find(s => s.name === data.applicantName);
+    if (staff && staff.surname) return staff.surname;
+    return String(data.applicantName || '').trim().split(/[ 　]+/)[0] || '';
+  }
+
+  function buildPrintArea(data, applicationId, showApplicantSeal) {
     // B5用紙1枚に、同一内容を上下2部（上＝申請用、下＝係控え）印刷し、
     // 真ん中は破線で区切って裁断できるようにする。
     $('printArea').innerHTML = `
       <div class="print-page">
-        ${buildCopyHtml(data, applicationId, '')}
+        ${buildCopyHtml(data, applicationId, '', showApplicantSeal)}
         <div class="print-cut-line"><span>✂　－　－　－　－　－　－　－　－　－　－　－　－　－　－　－　－</span></div>
-        ${buildCopyHtml(data, applicationId, '係控え')}
+        ${buildCopyHtml(data, applicationId, '係控え', showApplicantSeal)}
       </div>
     `;
   }
 
 
-  function printData(data, applicationId) {
-    buildPrintArea(data, applicationId);
+  function printData(data, applicationId, showApplicantSeal) {
+    buildPrintArea(data, applicationId, showApplicantSeal);
     window.print();
   }
 
@@ -859,6 +885,8 @@
     $('division').value = applicant.division;
     populateStores(applicant.store);
     populateSections(applicant.sectionCode);
+    populateStaffNameList();
+    updateApplicantNameAvailability();
     // 申請者名はあえて復元しない（共有端末で次の人が別人の名前のまま送信する事故を防ぐため）。
     // 事業部・店・係・申請者区分は変更頻度が低いので、利便性のため引き続き復元する。
     updateApplicantStaffHint(); // 氏名が空になった状態に合わせて、承認者欄・ヒントをリセットする

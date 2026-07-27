@@ -345,6 +345,17 @@ textarea {
   transform: none;
   accent-color: var(--green);
 }
+.submit-error-banner {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: #FDECEA;
+  border: 1px solid rgba(192, 57, 43, 0.35);
+  color: var(--caution);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.6;
+}
 
 .honeypot {
   position: absolute !important;
@@ -395,6 +406,7 @@ dialog::backdrop { background: rgba(37,37,37,.4); }
 }
 
 .print-sheet {
+  /* 枠組み・ラベルはゴシック体をベースにする。データ部分は個別に明朝体を指定する。 */
   font-family: "Noto Sans JP", "Yu Gothic", sans-serif;
   color: #000;
   width: 100%;
@@ -438,6 +450,7 @@ dialog::backdrop { background: rgba(37,37,37,.4); }
   right: 0;
   bottom: 2px;
   font-size: 11px;
+  font-family: "ＭＳ 明朝", "MS Mincho", serif; /* データ（日付）は明朝体 */
 }
 .print-table {
   width: 100%;
@@ -457,25 +470,31 @@ dialog::backdrop { background: rgba(37,37,37,.4); }
   text-align: center;
   background: #F7F7F7;
   white-space: nowrap;
+  /* ラベルはゴシック体（.print-sheetの既定を継承） */
 }
 .print-val {
   height: 1.4em;
+  font-family: "ＭＳ 明朝", "MS Mincho", serif; /* データ部分は明朝体 */
 }
-.print-routes {
-  margin-top: -1px;
+
+/* 区間ごとの改行形式（罫線テーブルではなく、ラベル：値の2行ブロックを縦に並べる）。
+   経路は「～」区切り、利用路線は「/」区切り。往復時は経路の先頭に「（往復）」を付ける。 */
+.print-segment-list {
+  border: 1px solid #333;
+  border-top: none;
 }
-/* 経路欄は行高を固定し、文字量に応じてフォントサイズを自動で縮める（JS側で inline style を付与）。
-   はみ出す場合の保険として nowrap + overflow:hidden も掛けておく。 */
-.print-route-cell {
-  height: 24px;
-  width: 50%;
-  white-space: nowrap;
-  line-height: 24px;
-  padding: 0 8px;
+.print-segment-block {
+  padding: 5px 8px;
+  border-top: 1px solid #333;
+  font-family: "ＭＳ 明朝", "MS Mincho", serif; /* 区間の中身はデータなので明朝体 */
 }
-.print-route-cell span {
-  display: inline-block;
-  line-height: 1.3;
+.print-segment-route {
+  font-size: 12px;
+}
+.print-segment-line {
+  font-size: 11px;
+  color: #333;
+  margin-top: 2px;
 }
 
 /* ハンコ欄（認印・経理・所属上長）と金額欄（運賃計・合計）を同一テーブルの1行にまとめ、
@@ -494,7 +513,27 @@ dialog::backdrop { background: rgba(37,37,37,.4); }
 }
 .print-stamp-box {
   height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
+/* ハンコらしい見た目：朱色の正円＋朱色の文字（MS明朝）、実際に押したような軽い傾き。 */
+.print-seal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 1.6px solid #c0392b;
+  border-radius: 50%;
+  color: #c0392b;
+  font-family: "ＭＳ 明朝", "MS Mincho", serif;
+  font-weight: bold;
+  font-size: 13px;
+  transform: rotate(-6deg);
+}
+
 .print-amount-cell {
   width: 46%;
 }
@@ -511,10 +550,12 @@ dialog::backdrop { background: rgba(37,37,37,.4); }
 .print-amount-row span:first-child {
   font-size: 11px;
   font-weight: bold;
+  font-family: "Noto Sans JP", "Yu Gothic", sans-serif; /* ラベル側はゴシック */
 }
 .print-amount {
   font-weight: bold;
   font-size: 13px;
+  font-family: "ＭＳ 明朝", "MS Mincho", serif; /* 金額はデータなので明朝体 */
 }
 .print-claim-line {
   margin-top: 8px;
@@ -524,6 +565,10 @@ dialog::backdrop { background: rgba(37,37,37,.4); }
   margin-top: 10px;
   font-size: 11px;
   text-align: left;
+}
+
+.print-setup {
+  padding: 4px 20px 0;
 }
 
 .print-purpose-selected {

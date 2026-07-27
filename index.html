@@ -11,10 +11,7 @@
   <header class="site-head">
     <div class="container site-head__inner">
       <a class="site-logo" href="../">中央大学生活協同組合　社内申請</a>
-      <nav class="site-nav" aria-label="申請メニュー">
-        <a href="../">申請メニュー</a>
-        <span class="save-state" id="saveState">入力中</span>
-      </nav>
+      <span class="save-state" id="saveState">入力中</span>
     </div>
   </header>
 
@@ -29,7 +26,7 @@
   <main class="container expense-main">
     <section class="rule-box" aria-label="申請ルール">
       <strong>申請ルール</strong>
-      <p>通勤定期区間を除き、PASMO・Suica等のIC運賃で申請してください。食事代は申請対象外です。</p>
+      <p>通勤定期区間を除き、PASMO・Suica等のIC運賃で申請してください。</p>
     </section>
 
     <form id="expenseForm" novalidate>
@@ -79,7 +76,7 @@
             <select class="select" id="approverSelect">
               <option value="">指定しない（対面で押印してもらう）</option>
             </select>
-            <p class="field-note">選ぶと、送信時に承認者へメールで承認依頼が届きます（クリックすると承認成立）。申請者と同格以上の役職者のみ選べます。</p>
+            <p class="field-note">承認者へメールで承認依頼の場合に使用（クリックすると承認成立）。経費負担係の上長に申請ください。</p>
           </div>
         </div>
       </section>
@@ -212,6 +209,7 @@ IC優先：453円
               </div>
               <div class="field field-narrow"><label>IC運賃（片道）<span class="req">必須</span></label><div class="money-input"><input class="input seg-fare" type="number" min="0" step="1" required><span>円</span></div></div>
               <div class="field field-full"><label>利用路線（任意）</label><input class="input seg-route-line" placeholder="例：ＪＲ南武線 川崎行"><p class="field-note">解析結果から自動入力されます。空欄でも申請できます。</p></div>
+              <div class="field field-full seg-other-wrap" hidden><label>その他の内容（タクシー等）<span class="req">必須</span></label><input class="input seg-other-detail" placeholder="例：タクシー利用（雨天のため）"></div>
             </div>
           </div>
         </div>
@@ -222,16 +220,13 @@ IC優先：453円
         <div class="choice-grid trip-options" role="radiogroup" aria-label="申請区分">
           <label class="choice-card"><input type="radio" name="tripType" value="oneWay" checked><span>片道</span></label>
           <label class="choice-card"><input type="radio" name="tripType" value="roundTrip"><span>同額往復</span></label>
-          <label class="choice-card"><input type="radio" name="tripType" value="custom"><span>金額を手修正</span></label>
         </div>
         <p class="field-note">IC運賃合計（全区間）：<strong id="fareSumView">0</strong>円</p>
         <div class="amount-box"><span>申請額</span><div><strong id="claimedAmountView">0</strong><small>円</small></div></div>
-        <div class="field field-narrow" id="customAmountWrap" hidden><label for="customAmount">申請額を直接入力</label><div class="money-input"><input class="input" id="customAmount" type="number" min="0" step="1"><span>円</span></div></div>
-        <div class="field field-full"><label for="remarks">備考</label><textarea id="remarks" name="remarks" rows="3" placeholder="通常と異なる経路、タクシー利用等がある場合のみ記入"></textarea></div>
       </section>
 
       <section class="form-card final-card">
-        <label class="confirm-check"><input id="confirmCheck" type="checkbox" required><span>内容を確認し、通勤定期区間を除いたIC運賃であることを確認しました。</span></label>
+        <div id="submitErrorBanner" class="submit-error-banner" hidden></div>
         <div class="submit-row">
           <button type="button" class="btn btn-sub" id="previewButton">申請内容を確認</button>
           <button type="submit" class="btn" id="submitButton">申請する</button>
@@ -245,9 +240,20 @@ IC優先：453円
     <div class="dialog-head"><h2>申請内容の確認</h2><button type="button" class="dialog-close" id="closePreview" aria-label="閉じる">×</button></div>
     <div id="previewContent"></div>
     <div class="dialog-actions">
-      <button type="button" class="btn btn-sub" id="printButton">印刷する</button>
       <button type="button" class="btn btn-sub" id="closePreviewBottom">戻る</button>
-      <button type="button" class="btn" id="submitFromPreviewButton">この内容で申請する</button>
+      <button type="button" class="btn btn-sub" id="openPrintDialogButton">印刷</button>
+      <button type="button" class="btn" id="submitFromPreviewButton">承認要請</button>
+    </div>
+  </dialog>
+
+  <dialog id="printDialog">
+    <div class="dialog-head"><h2>印刷</h2><button type="button" class="dialog-close" id="closePrintDialog" aria-label="閉じる">×</button></div>
+    <div class="print-setup">
+      <label class="confirm-check"><input type="checkbox" id="showApplicantSealCheck"><span>申請者印鑑を表示する（対面で押印する場合はチェック不要）</span></label>
+    </div>
+    <div class="dialog-actions">
+      <button type="button" class="btn btn-sub" id="closePrintDialogBottom">戻る</button>
+      <button type="button" class="btn" id="doPrintButton">印刷／PDF</button>
     </div>
   </dialog>
 
@@ -258,7 +264,7 @@ IC優先：453円
       <p>受付番号</p>
       <strong id="completeApplicationId">—</strong>
       <p id="completeNote"></p>
-      <button type="button" class="btn btn-sub" id="printCompleteButton">印刷する</button>
+      <button type="button" class="btn btn-sub" id="printCompleteButton">印刷</button>
       <button type="button" class="btn" id="closeComplete">閉じる</button>
     </div>
   </dialog>
