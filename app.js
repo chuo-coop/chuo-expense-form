@@ -327,12 +327,21 @@
       const lineName = (content.length > 1 && /行$/u.test(content[content.length - 1])
         ? content.slice(0, -1)
         : content
-      ).map(l => l
-        .replace(/^(ＪＲ|JR)/u, '')
-        // 新幹線の列車愛称＋号数（例：「こだま839号」）は路線名ではないので除く。
-        .replace(/(のぞみ|ひかり|こだま|はやぶさ|こまち|つばさ|やまびこ|なすの|とき|たにがわ|かがやき|はくたか|つるぎ|さくら|みずほ|つばめ)\d*号?$/u, '')
-        // 「特急」「急行」等の種別も路線名の一部ではないので末尾から除く。
-        .replace(/(特別快速|通勤特快|通勤快速|中央特快|青梅特快|快速急行|区間急行|区間快速|新快速|特急|急行|快速|準急|各停|普通)$/u, '')
+      ).map(l => {
+        let cleaned = l
+          .replace(/^(ＪＲ|JR)/u, '')
+          // 新幹線の列車愛称＋号数（例：「こだま839号」）は路線名ではないので除く。
+          .replace(/(のぞみ|ひかり|こだま|はやぶさ|こまち|つばさ|やまびこ|なすの|とき|たにがわ|かがやき|はくたか|つるぎ|さくら|みずほ|つばめ)\d*号?$/u, '');
+        // 「特急」「通勤急行」等の種別語は末尾から剥がす。「通勤急行」のように種別語が
+        // 2つ重なっているケースもあるため、これ以上剥がれなくなるまで繰り返す。
+        const suffixPattern = /(特別快速|通勤特快|通勤快速|通勤急行|通勤準急|通勤特急|中央特快|青梅特快|快速急行|区間急行|区間快速|新快速|特急|急行|快速|準急|各停|普通|通勤)$/u;
+        let previous;
+        do {
+          previous = cleaned;
+          cleaned = cleaned.replace(suffixPattern, '');
+        } while (cleaned !== previous);
+        return cleaned;
+      }
       ).join(' ').replace(/\s+/gu, ' ').trim();
       return { type, fare, line: lineName };
     },
