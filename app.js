@@ -770,7 +770,6 @@
         </table>
 
         <p class="print-claim-line">上記の金額を請求致します${applicationId ? `（受付番号　${escapeHtml(applicationId)}）` : ''}</p>
-        <p class="print-section-seal">係　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　印</p>
       </div>
     `;
   }
