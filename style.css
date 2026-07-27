@@ -410,9 +410,11 @@ dialog::backdrop { background: rgba(37,37,37,.4); }
   font-family: "Noto Sans JP", "Yu Gothic", sans-serif;
   color: #000;
   width: 100%;
+  height: 119.5mm; /* B5（182×257mm、@pageの余白8mmずつ）を厳密に半分ずつ固定する（破線3mm分を差し引き） */
   margin: 0 auto;
-  padding: 6mm 8mm;
+  padding: 5mm 8mm;
   box-sizing: border-box;
+  overflow: visible; /* 区間数が多く高さを超える場合、hiddenで見えなくなるより、はみ出して見える方が安全 */
 }
 .print-page {
   width: 100%;
@@ -422,16 +424,16 @@ dialog::backdrop { background: rgba(37,37,37,.4); }
   align-items: center;
   justify-content: center;
   border-top: 1px dashed #666;
-  margin: 2mm 0;
-  padding-top: 2px;
+  height: 3mm;
+  box-sizing: border-box;
 }
 .print-cut-line span {
-  font-size: 10px;
+  font-size: 9px;
   color: #666;
-  letter-spacing: 1px;
+  letter-spacing: 2px;
   background: #fff;
-  transform: translateY(-8px);
-  padding: 0 6px;
+  transform: translateY(-7px);
+  padding: 0 8px;
 }
 .print-title-row {
   display: flex;

@@ -711,9 +711,18 @@
     }).join('');
   }
 
+  // 苗字の文字数に応じてフォントサイズを縮める（3文字以上でも丸からはみ出さないように）。
+  function sealFontSize(length) {
+    if (length <= 1) return 13;
+    if (length === 2) return 11;
+    if (length === 3) return 9;
+    return 7; // 4文字以上（かなり稀だが念のため）
+  }
+
   function sealHtml(surname) {
     if (!surname) return '';
-    return `<span class="print-seal">${escapeHtml(surname)}</span>`;
+    const size = sealFontSize(surname.length);
+    return `<span class="print-seal" style="font-size:${size}px;">${escapeHtml(surname)}</span>`;
   }
 
   // 1部（申請用 or 係控え）ぶんのHTMLを組み立てる。上下で内容は完全に同一。
@@ -728,6 +737,10 @@
         </div>
 
         <table class="print-table">
+          <tr>
+            <td class="print-lbl" style="width:80px;">申請者</td>
+            <td class="print-val" colspan="3">${escapeHtml(data.division)}／${escapeHtml(data.store)}／${escapeHtml(data.sectionName)}（${escapeHtml(data.sectionCode.slice(2))}）　${escapeHtml(data.applicantName)}</td>
+          </tr>
           <tr>
             <td class="print-lbl" style="width:80px;">出張日</td>
             <td class="print-val">${escapeHtml(data.travelDate)}</td>
@@ -774,7 +787,7 @@
     $('printArea').innerHTML = `
       <div class="print-page">
         ${buildCopyHtml(data, applicationId, '', showApplicantSeal)}
-        <div class="print-cut-line"><span>✂　－　－　－　－　－　－　－　－　－　－　－　－　－　－　－　－</span></div>
+        <div class="print-cut-line"><span>切り取り線</span></div>
         ${buildCopyHtml(data, applicationId, '係控え', showApplicantSeal)}
       </div>
     `;
