@@ -12,7 +12,7 @@
   const completeDialog = $('completeDialog');
   const saveState = $('saveState');
   const submitButton = $('submitFromPreviewButton');
-  const MAX_SEGMENTS = 10;
+  const MAX_SEGMENTS = 6; // B5固定の印刷枠に収まる現実的な上限として、10から見直した
   let clientToken = '';
   let segmentSeq = 0;
   let staffDirectory = [];
@@ -479,7 +479,7 @@
   function updateSegmentControls() {
     const count = segmentCards().length;
     $('addSegmentButton').disabled = count >= MAX_SEGMENTS;
-    $('segmentLimitNote').textContent = count >= MAX_SEGMENTS ? '区間は最大10件までです。' : '';
+    $('segmentLimitNote').textContent = count >= MAX_SEGMENTS ? '区間は最大6件までです。' : '';
     segmentCards().forEach(card => {
       card.querySelector('.seg-remove').hidden = count <= 1;
     });
