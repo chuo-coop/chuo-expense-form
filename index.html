@@ -263,6 +263,14 @@ IC優先：453円
       <p>受付番号</p>
       <strong id="completeApplicationId">—</strong>
       <p id="completeNote"></p>
+      <div id="approveUrlBox" class="approve-url-box" hidden>
+        <p class="field-note">承認者へメールが届かない場合は、あなたのメールソフトから直接お送りください。</p>
+        <div class="approve-url-row">
+          <a href="#" id="mailtoApproveButton" class="btn btn-sub" target="_blank" rel="noopener">メールソフトで送る</a>
+          <button type="button" class="btn btn-sub" id="copyApproveUrlButton">URLをコピー</button>
+        </div>
+        <input type="text" id="approveUrlInput" class="input" readonly>
+      </div>
       <button type="button" class="btn btn-sub" id="printCompleteButton">印刷</button>
       <button type="button" class="btn" id="closeComplete">閉じる</button>
     </div>

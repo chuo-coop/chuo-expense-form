@@ -153,6 +153,17 @@
       printData(pendingPrintContext.data, pendingPrintContext.applicationId, $('showApplicantSealCheck').checked);
     });
     $('closeComplete').addEventListener('click', closeComplete);
+    $('copyApproveUrlButton').addEventListener('click', async () => {
+      const input = $('approveUrlInput');
+      input.select();
+      try {
+        await navigator.clipboard.writeText(input.value);
+        $('copyApproveUrlButton').textContent = 'コピーしました';
+        setTimeout(() => { $('copyApproveUrlButton').textContent = 'URLをコピー'; }, 2000);
+      } catch (e) {
+        // clipboard APIが使えない環境向けのフォールバック（選択状態にするだけでも手動コピー可能）。
+      }
+    });
     $('routeHelpButton').addEventListener('click', () => $('routeHelpDialog').showModal());
     $('closeRouteHelp').addEventListener('click', () => $('routeHelpDialog').close());
     $('closeRouteHelpBottom').addEventListener('click', () => $('routeHelpDialog').close());
@@ -935,7 +946,7 @@
           status = await checkSubmissionStatus(endpoint, data.clientToken);
         }
       }
-      if (status.found) return { ok: true, applicationId: status.applicationId, emailSendFailed: status.emailSendFailed };
+      if (status.found) return { ok: true, applicationId: status.applicationId, emailSendFailed: status.emailSendFailed, approveUrl: status.approveUrl, approverEmail: status.approverEmail };
       throw new Error('送信の確認が取れませんでした。ネットワークの状態を確認し、時間をおいて再度お試しください。');
     }
   }
@@ -974,9 +985,35 @@
       $('completeNote').textContent = result.demo
         ? '現在はデモ保存です。GAS URLを設定すると本番保存になります。'
         : result.emailSendFailed
-          ? '申請は保存されましたが、承認依頼メールの送信に失敗しました。お手数ですが、承認者へ直接ご連絡ください。'
+          ? '申請は保存されましたが、承認依頼メールの送信に失敗しました。下のURLを承認者へ直接お送りください。'
           : '';
       $('completeNote').classList.toggle('field-note--warning', Boolean(result.emailSendFailed));
+
+      // メールが確実に届く保証がないため、承認URLは常に（成功・失敗に関わらず）
+      // 「メールソフトで送る」ボタン（mailto:リンク）とコピー欄の両方を見せておく。
+      // mailto:は申請者自身の普段のメーラーから送るので、GAS/Google経由の送信問題を
+      // 丸ごと回避できる、一番確実な保険になる。
+      if (result.approveUrl) {
+        $('approveUrlInput').value = result.approveUrl;
+        $('approveUrlBox').hidden = false;
+
+        const mailSubject = `【承認依頼】交通費申請（${data.applicantName}／${result.applicationId}）`;
+        const mailBody = [
+          `${data.applicantName} です。交通費申請の承認をお願いします。`,
+          '',
+          `出張日：${data.travelDate}　出張先：${data.businessDestination}`,
+          `申請額：${data.claimedAmount.toLocaleString()}円`,
+          '',
+          '以下のURLをクリックすると承認が確定します。',
+          result.approveUrl
+        ].join('\n');
+        const mailtoUrl = `mailto:${encodeURIComponent(result.approverEmail || '')}`
+          + `?subject=${encodeURIComponent(mailSubject)}&body=${encodeURIComponent(mailBody)}`;
+        $('mailtoApproveButton').href = mailtoUrl;
+      } else {
+        $('approveUrlBox').hidden = true;
+      }
+
       completeDialog.showModal();
       clientToken = '';
     } catch (error) {
