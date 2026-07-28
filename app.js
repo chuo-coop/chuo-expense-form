@@ -1010,6 +1010,9 @@
         const mailtoUrl = `mailto:${encodeURIComponent(result.approverEmail || '')}`
           + `?subject=${encodeURIComponent(mailSubject)}&body=${encodeURIComponent(mailBody)}`;
         $('mailtoApproveButton').href = mailtoUrl;
+
+        // 「ボタンを押したら開く」ではなく、完了画面が出た時点で実際にメーラーを自動起動する。
+        window.location.href = mailtoUrl;
       } else {
         $('approveUrlBox').hidden = true;
       }

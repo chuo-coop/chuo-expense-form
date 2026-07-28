@@ -435,8 +435,8 @@ dialog::backdrop { background: rgba(37,37,37,.4); }
   font-family: "Noto Sans JP", "Yu Gothic", sans-serif;
   color: #000;
   width: 100%;
-  height: 118mm; /* B5（182×257mm、@pageの余白8mmずつ＝印刷可能241mm）を半分ずつ固定。
-                    118mm×2＋破線3mm＝239mmとし、2mmの余裕を持たせて2ページ目に溢れないようにする */
+  height: 122mm; /* @pageのmargin:0化により、B5全高257mmを基準に計算し直した。
+                    122mm×2＋破線3mm＋外周余白6mm＝253mmとし、4mmの余裕を持たせる */
   margin: 0 auto;
   padding: 4mm 8mm;
   box-sizing: border-box;
@@ -444,6 +444,8 @@ dialog::backdrop { background: rgba(37,37,37,.4); }
 }
 .print-page {
   width: 100%;
+  padding: 3mm 0; /* @page margin:0にしたため、用紙の物理的な印刷不可領域（端）を避ける最小限の余白 */
+  box-sizing: border-box;
 }
 .print-cut-line {
   display: flex;
@@ -609,7 +611,7 @@ dialog::backdrop { background: rgba(37,37,37,.4); }
 
 @page {
   size: B5;
-  margin: 8mm;
+  margin: 0; /* ブラウザ独自の「デフォルト余白」解釈に頼らない。余白は.print-sheet自身のpaddingで作る */
 }
 
 @media (max-width:760px) {
