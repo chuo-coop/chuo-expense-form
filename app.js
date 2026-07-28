@@ -723,17 +723,34 @@
     return `${mainParts}・${wrap('その他', otherSelected)}（${otherDetail}）`;
   }
 
+  // 区間の内容量（行数）に応じてフォントサイズと余白を自動で縮める（GAS側と同じ考え方）。
+  // 枠は固定（overflow）にするため、内容が多いほど文字を小さくして収める。
+  function segmentFontTier(totalLines) {
+    if (totalLines <= 6) return { fontSize: 12, subFontSize: 11, padding: '3px 8px', gap: '2px' };
+    if (totalLines <= 9) return { fontSize: 11, subFontSize: 10, padding: '2px 8px', gap: '1px' };
+    if (totalLines <= 13) return { fontSize: 10, subFontSize: 9, padding: '2px 8px', gap: '1px' };
+    return { fontSize: 9, subFontSize: 8, padding: '1px 8px', gap: '0px' };
+  }
+
   function routeRowsHtml(data) {
+    const totalLines = data.segments.reduce((sum, s) => {
+      let lines = 1;
+      if (s.routeLine) lines += 1;
+      if (s.transportType === 'その他' && s.otherDetail) lines += 1;
+      return sum + lines;
+    }, 0);
+    const tier = segmentFontTier(totalLines);
+
     return data.segments.map((s, i) => {
       const routePrefix = data.tripType === 'roundTrip' ? '（往復）' : '';
       const routeLine = `${routePrefix}${s.origin}${s.viaStations && s.viaStations !== 'なし' ? '～' + s.viaStations.replace(/\s*→\s*/gu, '～') : ''}～${s.destination}`;
       const usedLines = s.routeLine ? s.routeLine.replace(/\s*→\s*/gu, '/') : '';
       const otherLine = s.transportType === 'その他' && s.otherDetail ? `その他：${s.otherDetail}` : '';
       return `
-        <div class="print-segment-block">
-          <div class="print-segment-route">区間：${escapeHtml(routeLine)}</div>
-          ${usedLines ? `<div class="print-segment-line">利用路線：${escapeHtml(usedLines)}</div>` : ''}
-          ${otherLine ? `<div class="print-segment-line">${escapeHtml(otherLine)}</div>` : ''}
+        <div class="print-segment-block" style="padding:${tier.padding};">
+          <div class="print-segment-route" style="font-size:${tier.fontSize}px;">区間：${escapeHtml(routeLine)}</div>
+          ${usedLines ? `<div class="print-segment-line" style="font-size:${tier.subFontSize}px;margin-top:${tier.gap};">利用路線：${escapeHtml(usedLines)}</div>` : ''}
+          ${otherLine ? `<div class="print-segment-line" style="font-size:${tier.subFontSize}px;margin-top:${tier.gap};">${escapeHtml(otherLine)}</div>` : ''}
         </div>
       `;
     }).join('');

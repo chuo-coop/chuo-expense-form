@@ -435,8 +435,8 @@ dialog::backdrop { background: rgba(37,37,37,.4); }
   font-family: "Noto Sans JP", "Yu Gothic", sans-serif;
   color: #000;
   width: 100%;
-  height: 122mm; /* @pageのmargin:0化により、B5全高257mmを基準に計算し直した。
-                    122mm×2＋破線3mm＋外周余白6mm＝253mmとし、4mmの余裕を持たせる */
+  height: 100mm; /* 計算上の余白ではなく、実際に見えている余白の多さを踏まえて大幅に安全側に振った値。
+                    100mm×2＋破線3mm＋外周余白6mm＝209mmとし、B5全高257mmに対して48mmの大きな余裕を持たせる */
   margin: 0 auto;
   padding: 4mm 8mm;
   box-sizing: border-box;
