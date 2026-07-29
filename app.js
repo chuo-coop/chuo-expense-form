@@ -140,7 +140,6 @@
     });
     $('closePreview').addEventListener('click', () => previewDialog.close());
     $('closePreviewBottom').addEventListener('click', () => previewDialog.close());
-    $('openPrintDialogButton').addEventListener('click', () => openPrintDialog(formDataObject(), ''));
     $('submitFromPreviewButton').addEventListener('click', () => {
       // 確認画面をすぐ閉じると、送信完了までの間（フォールバック時は最大15秒程度）
       // 画面に何も表示されず不安にさせてしまうため、閉じずに処理中表示を出したままにする。
@@ -697,6 +696,11 @@
       <dt>備考</dt><dd>${escapeHtml(data.remarks || 'なし')}</dd>
       <dt>承認者</dt><dd>${data.approverName ? escapeHtml(data.approverName) + '（メールで承認依頼を送ります）' : '指定なし（対面で押印してもらってください）'}</dd>
     </dl>`;
+    // 承認者を選択している場合は「承認要請」（メールでOTP付き承認依頼）、
+    // 選択していない場合（対面で押印してもらう運用）は「登録・印刷」に切り替える。
+    // 対面運用では承認スタンプは無く、S/Sへ登録したうえで、その場で印刷して
+    // 押印してもらうだけの流れになるため、ボタンの意味合いを分ける。
+    submitButton.textContent = data.approverName ? '承認要請' : '登録・印刷';
   }
 
   function escapeHtml(value) {
@@ -812,7 +816,7 @@
               <td class="print-stamp-cell">経理<div class="print-stamp-box"></div></td>
               <td class="print-stamp-cell">所属上長<div class="print-stamp-box"></div></td>
               <td class="print-amount-cell">
-                <div class="print-amount-row"><span>運賃計</span><span class="print-amount">${data.icFare.toLocaleString()}円</span></div>
+                <div class="print-amount-row"><span>運賃計</span><span class="print-amount">${data.claimedAmount.toLocaleString()}円</span></div>
                 <div class="print-amount-row"><span>合　計</span><span class="print-amount">${data.claimedAmount.toLocaleString()}円</span></div>
               </td>
             </tr>
@@ -1026,15 +1030,25 @@
       lastApplicationId = result.applicationId;
       lastSubmittedData = data;
       $('completeApplicationId').textContent = result.applicationId;
+      // 承認者を選択したか（メールでOTP承認依頼）／選択していないか（対面で押印。
+      // 承認スタンプは無く、登録後その場で印刷して提出する運用）で、案内文を分ける。
+      const hasApprover = Boolean(data.approverName);
       $('completeNote').textContent = result.demo
         ? '現在はデモ保存です。GAS URLを設定すると本番保存になります。'
-        : result.emailSendFailed
-          ? '申請は保存されましたが、承認依頼メール（ワンタイムコード）の送信に失敗しました。お手数ですが承認者へ直接ご連絡ください。'
-          : '承認者へワンタイムコード付きのメールを送信しました。';
+        : !hasApprover
+          ? '登録しました。このまま印刷し、押印のうえ提出してください。'
+          : result.emailSendFailed
+            ? '申請は保存されましたが、承認依頼メール（ワンタイムコード）の送信に失敗しました。お手数ですが承認者へ直接ご連絡ください。'
+            : '承認者へワンタイムコード付きのメールを送信しました。';
       $('completeNote').classList.toggle('field-note--warning', Boolean(result.emailSendFailed));
 
       previewDialog.close();
       completeDialog.showModal();
+      // 対面運用（承認者未選択）は「登録・印刷」の一連の操作のため、登録完了と
+      // 同時に印刷ダイアログも開き、その場で印刷まで進められるようにする。
+      if (!result.demo && !hasApprover) {
+        openPrintDialog(data, result.applicationId);
+      }
       clientToken = '';
     } catch (error) {
       saveState.textContent = '送信失敗';

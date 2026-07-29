@@ -91,7 +91,7 @@
           </div>
           <div class="field">
             <label for="businessDestination">出張先<span class="req">必須</span></label>
-            <input class="input" id="businessDestination" name="businessDestination" required placeholder="例：青山一丁目・取引先">
+            <input class="input" id="businessDestination" name="businessDestination" required placeholder="訪問先を具体的に記入">
           </div>
           <div class="field field-full">
             <label>目的<span class="req">必須</span></label>
@@ -209,7 +209,7 @@ IC優先：453円
                 </select>
               </div>
               <div class="field field-narrow"><label>IC運賃（片道）<span class="req">必須</span></label><div class="money-input"><input class="input seg-fare" type="number" min="0" step="1" required><span>円</span></div></div>
-              <div class="field field-full"><label>利用路線（任意）</label><input class="input seg-route-line" placeholder="例：ＪＲ南武線 川崎行"><p class="field-note">解析結果から自動入力されます。空欄でも申請できます。</p></div>
+              <div class="field field-full"><label>利用路線（任意）</label><input class="input seg-route-line" placeholder="例：ＪＲ南武線 川崎行"><p class="field-note">解析結果から自動入力されます。Yahoo!路線情報側の表示形式により、うまく変換できないことがあります。その場合はここを直接編集してください（空欄でも申請できます）。</p></div>
               <div class="field field-full seg-other-wrap" hidden><label>その他の内容（タクシー等）<span class="req">必須</span></label><input class="input seg-other-detail" placeholder="例：タクシー利用（雨天のため）"></div>
             </div>
           </div>
@@ -244,7 +244,6 @@ IC優先：453円
     </div>
     <div class="dialog-actions">
       <button type="button" class="btn btn-sub" id="closePreviewBottom">戻る</button>
-      <button type="button" class="btn btn-sub" id="openPrintDialogButton">印刷</button>
       <button type="button" class="btn" id="submitFromPreviewButton">承認要請</button>
     </div>
   </dialog>
@@ -269,7 +268,7 @@ IC優先：453円
       <p class="field-note">承認依頼メールに記載の受付番号・ワンタイムコードを入力してください。</p>
       <div class="field">
         <label>受付番号<span class="req">必須</span></label>
-        <input type="text" id="approvalApplicationId" class="input" placeholder="例：TR-202607-0001">
+        <input type="text" id="approvalApplicationId" class="input" placeholder="例：26A0101">
       </div>
       <div class="field">
         <label>ワンタイムコード<span class="req">必須</span></label>
