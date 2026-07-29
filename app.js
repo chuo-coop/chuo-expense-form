@@ -929,6 +929,27 @@
     });
   }
 
+  // 承認確定（confirmApprovalOtp）用：fetchの応答が読めない場合に、
+  // 「本当に承認されたか」をJSONP（CORSの制約を受けない）で確認する。
+  function checkApprovalStatus(endpoint, applicationId) {
+    return new Promise(resolve => {
+      const callbackName = `checkApprovalCallback_${Date.now()}`;
+      const script = document.createElement('script');
+      let settled = false;
+      const finish = result => {
+        if (settled) return;
+        settled = true;
+        delete window[callbackName];
+        script.remove();
+        resolve(result && result.ok ? result : { found: false, approved: false });
+      };
+      window[callbackName] = result => finish(result);
+      script.onerror = () => finish({ found: false, approved: false });
+      script.src = `${endpoint}?action=checkApprovalStatus&applicationId=${encodeURIComponent(applicationId)}&callback=${callbackName}`;
+      document.head.appendChild(script);
+    });
+  }
+
   async function submitToGas(data) {
     const endpoint = window.APP_CONFIG?.GAS_ENDPOINT;
     if (!endpoint) {
@@ -1037,12 +1058,31 @@
 
     $('confirmApprovalButton').disabled = true;
     try {
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ action: 'confirmApprovalOtp', payload: { applicationId, otp } })
-      });
-      const result = await response.json();
+      const payloadJson = JSON.stringify({ action: 'confirmApprovalOtp', payload: { applicationId, otp } });
+      let result;
+      try {
+        // 通常はfetchで送信・応答の両方を読む（詳細なエラーメッセージもそのまま受け取れる）。
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: payloadJson
+        });
+        result = await response.json();
+      } catch (fetchError) {
+        // fetchでの送信・応答の読み取り（GAS特有のCORSの揺らぎ）に失敗した場合の保険。
+        // 隠しフォームで念のため送信し直し、実際に承認されたかをJSONPで確認する。
+        console.error('fetch送信でエラーが発生したため、承認状況を別ルートで確認します', fetchError);
+        await postViaHiddenForm(endpoint, payloadJson);
+        let status = { approved: false };
+        for (let attempt = 0; attempt < 15 && !status.approved; attempt++) {
+          await new Promise(r => setTimeout(r, 1000));
+          status = await checkApprovalStatus(endpoint, applicationId);
+        }
+        result = status.approved
+          ? { ok: true, message: `承認しました。${status.applicantName || ''} さんへ、押印済みのPDFを送信しました。` }
+          : { ok: false, message: '通信状況が不安定なため、承認できたか確認が取れませんでした。時間をおいて、受付番号とワンタイムコードをもう一度お試しください。' };
+      }
+
       if (result.ok) {
         $('approvalSuccessMessage').textContent = result.message || '承認しました。';
         $('approvalSuccessMessage').hidden = false;
