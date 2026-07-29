@@ -383,6 +383,10 @@ dialog::backdrop { background: rgba(37,37,37,.4); }
 #previewContent dt, #previewContent dd { padding:9px 0; border-bottom:1px solid var(--border); }
 #previewContent dt { color:var(--text-muted); font-size:12px; font-weight:700; }
 .dialog-actions { padding:0 20px 20px; text-align:right; }
+.approval-panel { padding: 18px 20px; }
+.approval-panel .field { margin-bottom: 14px; }
+.approval-panel .field-note { margin-bottom: 14px; font-size: 13px; color: var(--text-muted); }
+#openApprovalDialogButton { margin-left: auto; margin-right: 12px; }
 .complete-panel { padding:34px 26px; text-align:center; }
 .complete-mark { width:50px; height:50px; display:flex; align-items:center; justify-content:center; margin:0 auto 14px; border-radius:50%; background:var(--green); color:#fff; font-size:26px; font-weight:900; }
 .complete-panel h2 { margin-bottom:18px; }
