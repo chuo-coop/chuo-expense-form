@@ -693,7 +693,6 @@
       <dt>IC運賃合計</dt><dd>${data.icFare.toLocaleString()}円</dd>
       <dt>申請区分</dt><dd>${escapeHtml(tripNames[data.tripType])}</dd>
       <dt>申請額</dt><dd>${data.claimedAmount.toLocaleString()}円</dd>
-      <dt>備考</dt><dd>${escapeHtml(data.remarks || 'なし')}</dd>
       <dt>承認者</dt><dd>${data.approverName ? escapeHtml(data.approverName) + '（メールで承認依頼を送ります）' : '指定なし（対面で押印してもらってください）'}</dd>
     </dl>`;
     // 承認者を選択している場合は「承認要請」（メールでOTP付き承認依頼）、
