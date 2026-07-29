@@ -726,10 +726,10 @@
   // 区間の内容量（行数）に応じてフォントサイズと余白を自動で縮める（GAS側と同じ考え方）。
   // 枠は固定（overflow）にするため、内容が多いほど文字を小さくして収める。
   function segmentFontTier(totalLines) {
-    if (totalLines <= 6) return { fontSize: 12, subFontSize: 11, padding: '3px 8px', gap: '2px' };
-    if (totalLines <= 9) return { fontSize: 11, subFontSize: 10, padding: '2px 8px', gap: '1px' };
-    if (totalLines <= 13) return { fontSize: 10, subFontSize: 9, padding: '2px 8px', gap: '1px' };
-    return { fontSize: 9, subFontSize: 8, padding: '1px 8px', gap: '0px' };
+    if (totalLines <= 6) return { fontSize: 12, subFontSize: 11, padding: '2px 8px', gap: '1px', lineHeight: '1.15' };
+    if (totalLines <= 9) return { fontSize: 11, subFontSize: 10, padding: '2px 8px', gap: '1px', lineHeight: '1.1' };
+    if (totalLines <= 13) return { fontSize: 10, subFontSize: 9, padding: '1px 8px', gap: '0px', lineHeight: '1.1' };
+    return { fontSize: 9, subFontSize: 8, padding: '1px 8px', gap: '0px', lineHeight: '1.05' };
   }
 
   function routeRowsHtml(data) {
@@ -748,9 +748,9 @@
       const otherLine = s.transportType === 'その他' && s.otherDetail ? `その他：${s.otherDetail}` : '';
       return `
         <div class="print-segment-block" style="padding:${tier.padding};">
-          <div class="print-segment-route" style="font-size:${tier.fontSize}px;">区間：${escapeHtml(routeLine)}</div>
-          ${usedLines ? `<div class="print-segment-line" style="font-size:${tier.subFontSize}px;margin-top:${tier.gap};">利用路線：${escapeHtml(usedLines)}</div>` : ''}
-          ${otherLine ? `<div class="print-segment-line" style="font-size:${tier.subFontSize}px;margin-top:${tier.gap};">${escapeHtml(otherLine)}</div>` : ''}
+          <div class="print-segment-route" style="font-size:${tier.fontSize}px;line-height:${tier.lineHeight};">区間：${escapeHtml(routeLine)}</div>
+          ${usedLines ? `<div class="print-segment-line" style="font-size:${tier.subFontSize}px;line-height:${tier.lineHeight};margin-top:${tier.gap};">利用路線：${escapeHtml(usedLines)}</div>` : ''}
+          ${otherLine ? `<div class="print-segment-line" style="font-size:${tier.subFontSize}px;line-height:${tier.lineHeight};margin-top:${tier.gap};">${escapeHtml(otherLine)}</div>` : ''}
         </div>
       `;
     }).join('');
@@ -784,13 +784,13 @@
         <div class="print-content-box">
           <table class="print-table">
             <tr>
-              <td class="print-lbl" style="width:80px;">申請者</td>
+              <td class="print-lbl" style="width:56px;">申請者</td>
               <td class="print-val" colspan="3">${escapeHtml(data.division)}／${escapeHtml(data.store)}／${escapeHtml(data.sectionName)}（${escapeHtml(data.sectionCode.slice(2))}）　${escapeHtml(data.applicantName)}</td>
             </tr>
             <tr>
-              <td class="print-lbl" style="width:80px;">出張日</td>
+              <td class="print-lbl" style="width:56px;">出張日</td>
               <td class="print-val">${escapeHtml(data.travelDate)}</td>
-              <td class="print-lbl" style="width:80px;">出張先</td>
+              <td class="print-lbl" style="width:56px;">出張先</td>
               <td class="print-val">${escapeHtml(data.businessDestination)}</td>
             </tr>
             <tr>
