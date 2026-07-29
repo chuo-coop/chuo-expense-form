@@ -158,6 +158,7 @@
       $('approvalOtp').value = '';
       $('approvalErrorMessage').hidden = true;
       $('approvalSuccessMessage').hidden = true;
+      $('approvalProcessingMessage').hidden = true;
       $('confirmApprovalButton').disabled = false;
       $('approvalDialog').showModal();
     });
@@ -1012,6 +1013,7 @@
     hideSubmitError();
     submitButton.disabled = true;
     saveState.textContent = '送信中';
+    $('submitProcessingMessage').hidden = false;
     try {
       const data = formDataObject();
       const result = await submitToGas(data);
@@ -1034,6 +1036,8 @@
       saveState.textContent = '送信失敗';
       submitButton.disabled = false;
       showSubmitError(error.message);
+    } finally {
+      $('submitProcessingMessage').hidden = true;
     }
   }
 
@@ -1042,6 +1046,7 @@
     const otp = $('approvalOtp').value.trim();
     $('approvalErrorMessage').hidden = true;
     $('approvalSuccessMessage').hidden = true;
+    $('approvalProcessingMessage').hidden = true;
 
     if (!applicationId || !otp) {
       $('approvalErrorMessage').textContent = '受付番号とワンタイムコードの両方を入力してください。';
@@ -1057,6 +1062,7 @@
     }
 
     $('confirmApprovalButton').disabled = true;
+    $('approvalProcessingMessage').hidden = false;
     try {
       const payloadJson = JSON.stringify({ action: 'confirmApprovalOtp', payload: { applicationId, otp } });
       let result;
@@ -1083,6 +1089,7 @@
           : { ok: false, message: '通信状況が不安定なため、承認できたか確認が取れませんでした。時間をおいて、受付番号とワンタイムコードをもう一度お試しください。' };
       }
 
+      $('approvalProcessingMessage').hidden = true;
       if (result.ok) {
         $('approvalSuccessMessage').textContent = result.message || '承認しました。';
         $('approvalSuccessMessage').hidden = false;
@@ -1093,6 +1100,7 @@
         $('confirmApprovalButton').disabled = false;
       }
     } catch (error) {
+      $('approvalProcessingMessage').hidden = true;
       $('approvalErrorMessage').textContent = '通信エラーが発生しました。時間をおいて再度お試しください。';
       $('approvalErrorMessage').hidden = false;
       $('confirmApprovalButton').disabled = false;

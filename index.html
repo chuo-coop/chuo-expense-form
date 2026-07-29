@@ -239,6 +239,9 @@ IC優先：453円
   <dialog id="previewDialog">
     <div class="dialog-head"><h2>申請内容の確認</h2><button type="button" class="dialog-close" id="closePreview" aria-label="閉じる">×</button></div>
     <div id="previewContent"></div>
+    <div class="message message--processing" id="submitProcessingMessage" hidden style="margin:0 20px 16px;">
+      <span class="spinner" aria-hidden="true"></span>受付中です。しばらくお待ちください…
+    </div>
     <div class="dialog-actions">
       <button type="button" class="btn btn-sub" id="closePreviewBottom">戻る</button>
       <button type="button" class="btn btn-sub" id="openPrintDialogButton">印刷</button>
@@ -274,6 +277,9 @@ IC優先：453円
       </div>
       <div class="message message--caution" id="approvalErrorMessage" hidden></div>
       <div class="message message--success" id="approvalSuccessMessage" hidden></div>
+      <div class="message message--processing" id="approvalProcessingMessage" hidden>
+        <span class="spinner" aria-hidden="true"></span>受付中です。しばらくお待ちください…
+      </div>
       <div class="dialog-actions">
         <button type="button" class="btn" id="confirmApprovalButton">承認する</button>
       </div>

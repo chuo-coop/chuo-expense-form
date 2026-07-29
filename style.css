@@ -194,6 +194,27 @@ textarea {
   background: var(--green-light);
   color: var(--green-dark);
 }
+.message--processing {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--warm-white);
+  color: var(--text-main);
+  font-weight: 700;
+}
+.spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--border);
+  border-top-color: var(--green);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
 
 /* 区間カード（最大10区間） */
 .segment-card {
