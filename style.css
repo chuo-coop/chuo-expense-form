@@ -435,24 +435,28 @@ dialog::backdrop { background: rgba(37,37,37,.4); }
   font-family: "Noto Sans JP", "Yu Gothic", sans-serif;
   color: #000;
   width: 100%;
-  height: 100mm; /* 計算上の余白ではなく、実際に見えている余白の多さを踏まえて大幅に安全側に振った値。
-                    100mm×2＋破線3mm＋外周余白6mm＝209mmとし、B5全高257mmに対して48mmの大きな余裕を持たせる */
+  height: 125mm; /* B6の実寸（182×128mm）を根拠にした固定値。B6を2つ縦に並べるとB5（182×257mm）に
+                    一致する（128×2＝256mm≒257mm）ため、安全側に少し削って125mmとした。
+                    125mm×2＋@pageの余白3mm×2＋区切り1mm＝257mmでB5にちょうど収まる計算。 */
   margin: 0 auto;
-  padding: 4mm 8mm;
+  padding: 3mm 8mm;
   box-sizing: border-box;
-  overflow: visible; /* 区間数が多く高さを超える場合、hiddenで見えなくなるより、はみ出して見える方が安全 */
+  overflow: hidden; /* 実寸に基づく固定値なので、はみ出しはフォント自動縮小側で吸収する前提でhiddenにする */
+  display: flex;
+  flex-direction: column;
 }
 .print-page {
   width: 100%;
-  padding: 3mm 0; /* @page margin:0にしたため、用紙の物理的な印刷不可領域（端）を避ける最小限の余白 */
-  box-sizing: border-box;
+}
+.print-page:not(.print-page--first) {
+  break-before: auto;
 }
 .print-cut-line {
   display: flex;
   align-items: center;
   justify-content: center;
   border-top: 1px dashed #666;
-  height: 3mm;
+  height: 1mm;
   box-sizing: border-box;
 }
 .print-cut-line span {
@@ -464,6 +468,7 @@ dialog::backdrop { background: rgba(37,37,37,.4); }
   padding: 0 8px;
 }
 .print-title-row {
+  flex: 0 0 auto;
   display: flex;
   align-items: baseline;
   justify-content: center;
@@ -588,8 +593,24 @@ dialog::backdrop { background: rgba(37,37,37,.4); }
   font-family: "ＭＳ 明朝", "MS Mincho", serif; /* 金額はデータなので明朝体 */
 }
 .print-claim-line {
+  flex: 0 0 auto;
   margin-top: 4px;
   font-size: 11px;
+}
+.print-content-box {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+.print-content-box > .print-table {
+  flex: 0 0 auto;
+}
+.print-content-box > .print-segment-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
 }
 .print-section-seal {
   margin-top: 10px;
@@ -611,7 +632,8 @@ dialog::backdrop { background: rgba(37,37,37,.4); }
 
 @page {
   size: B5;
-  margin: 0; /* ブラウザ独自の「デフォルト余白」解釈に頼らない。余白は.print-sheet自身のpaddingで作る */
+  margin: 3mm; /* B6実寸（128mm）を根拠に、B5一枚に上下2部を収める方式へ戻す。
+                  余白は最小限に絞り、高さの大半をコンテンツ側に残す。 */
 }
 
 @media (max-width:760px) {

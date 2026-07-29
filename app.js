@@ -781,38 +781,41 @@
           <div class="print-date">${escapeHtml(data.applicationDate || dateText)}${copyLabel ? `　（${escapeHtml(copyLabel)}）` : ''}</div>
         </div>
 
-        <table class="print-table">
-          <tr>
-            <td class="print-lbl" style="width:80px;">申請者</td>
-            <td class="print-val" colspan="3">${escapeHtml(data.division)}／${escapeHtml(data.store)}／${escapeHtml(data.sectionName)}（${escapeHtml(data.sectionCode.slice(2))}）　${escapeHtml(data.applicantName)}</td>
-          </tr>
-          <tr>
-            <td class="print-lbl" style="width:80px;">出張日</td>
-            <td class="print-val">${escapeHtml(data.travelDate)}</td>
-            <td class="print-lbl" style="width:80px;">出張先</td>
-            <td class="print-val">${escapeHtml(data.businessDestination)}</td>
-          </tr>
-          <tr>
-            <td class="print-lbl">目　的</td>
-            <td class="print-val" colspan="3">${purposeLineHtml(data)}</td>
-          </tr>
-        </table>
+        <div class="print-content-box">
+          <table class="print-table">
+            <tr>
+              <td class="print-lbl" style="width:80px;">申請者</td>
+              <td class="print-val" colspan="3">${escapeHtml(data.division)}／${escapeHtml(data.store)}／${escapeHtml(data.sectionName)}（${escapeHtml(data.sectionCode.slice(2))}）　${escapeHtml(data.applicantName)}</td>
+            </tr>
+            <tr>
+              <td class="print-lbl" style="width:80px;">出張日</td>
+              <td class="print-val">${escapeHtml(data.travelDate)}</td>
+              <td class="print-lbl" style="width:80px;">出張先</td>
+              <td class="print-val">${escapeHtml(data.businessDestination)}</td>
+            </tr>
+            <tr>
+              <td class="print-lbl">目　的</td>
+              <td class="print-val" colspan="3">${purposeLineHtml(data)}</td>
+            </tr>
+          </table>
 
-        <div class="print-segment-list">
-          ${routeRowsHtml(data)}
+          <div class="print-segment-list">
+            ${routeRowsHtml(data)}
+          </div>
+
+          <table class="print-table print-lower-table">
+            <tr>
+              <td class="print-stamp-cell">認印<div class="print-stamp-box">${showApplicantSeal ? sealHtml(applicantSurname(data)) : ''}</div></td>
+              <td class="print-stamp-cell">経理<div class="print-stamp-box"></div></td>
+              <td class="print-stamp-cell">所属上長<div class="print-stamp-box"></div></td>
+              <td class="print-amount-cell">
+                <div class="print-amount-row"><span>運賃計</span><span class="print-amount">${data.icFare.toLocaleString()}円</span></div>
+                <div class="print-amount-row"><span>合　計</span><span class="print-amount">${data.claimedAmount.toLocaleString()}円</span></div>
+              </td>
+            </tr>
+          </table>
         </div>
 
-        <table class="print-table print-lower-table">
-          <tr>
-            <td class="print-stamp-cell">認印<div class="print-stamp-box">${showApplicantSeal ? sealHtml(applicantSurname(data)) : ''}</div></td>
-            <td class="print-stamp-cell">経理<div class="print-stamp-box"></div></td>
-            <td class="print-stamp-cell">所属上長<div class="print-stamp-box"></div></td>
-            <td class="print-amount-cell">
-              <div class="print-amount-row"><span>運賃計</span><span class="print-amount">${data.icFare.toLocaleString()}円</span></div>
-              <div class="print-amount-row"><span>合　計</span><span class="print-amount">${data.claimedAmount.toLocaleString()}円</span></div>
-            </td>
-          </tr>
-        </table>
 
         <p class="print-claim-line">上記の金額を請求致します${applicationId ? `（受付番号　${escapeHtml(applicationId)}）` : ''}</p>
       </div>
@@ -826,8 +829,7 @@
   }
 
   function buildPrintArea(data, applicationId, showApplicantSeal) {
-    // B5用紙1枚に、同一内容を上下2部（上＝申請用、下＝係控え）印刷し、
-    // 真ん中は破線で区切って裁断できるようにする。
+    // B6の実寸（128mm）を根拠に、B5用紙1枚に上下2部を固定サイズで収める。
     $('printArea').innerHTML = `
       <div class="print-page">
         ${buildCopyHtml(data, applicationId, '', showApplicantSeal)}
