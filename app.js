@@ -784,13 +784,13 @@
         <div class="print-content-box">
           <table class="print-table">
             <tr>
-              <td class="print-lbl" style="width:44px;">申請者</td>
+              <td class="print-lbl" style="width:32px;">申請者</td>
               <td class="print-val" colspan="3">${escapeHtml(data.division)}／${escapeHtml(data.store)}／${escapeHtml(data.sectionName)}（${escapeHtml(data.sectionCode.slice(2))}）　${escapeHtml(data.applicantName)}</td>
             </tr>
             <tr>
-              <td class="print-lbl" style="width:44px;">出張日</td>
+              <td class="print-lbl" style="width:32px;">出張日</td>
               <td class="print-val">${escapeHtml(data.travelDate)}</td>
-              <td class="print-lbl" style="width:44px;">出張先</td>
+              <td class="print-lbl" style="width:32px;">出張先</td>
               <td class="print-val">${escapeHtml(data.businessDestination)}</td>
             </tr>
             <tr>
