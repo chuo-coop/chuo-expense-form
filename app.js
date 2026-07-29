@@ -142,7 +142,8 @@
     $('closePreviewBottom').addEventListener('click', () => previewDialog.close());
     $('openPrintDialogButton').addEventListener('click', () => openPrintDialog(formDataObject(), ''));
     $('submitFromPreviewButton').addEventListener('click', () => {
-      previewDialog.close();
+      // 確認画面をすぐ閉じると、送信完了までの間（フォールバック時は最大15秒程度）
+      // 画面に何も表示されず不安にさせてしまうため、閉じずに処理中表示を出したままにする。
       form.requestSubmit(); // 通常の「申請する」ボタンと同じsubmitイベントを発火させる
     });
     $('printCompleteButton').addEventListener('click', () => openPrintDialog(lastSubmittedData || formDataObject(), lastApplicationId));
@@ -789,9 +790,11 @@
             </tr>
             <tr>
               <td class="print-lbl" style="width:58px;">出張日</td>
-              <td class="print-val">${escapeHtml(data.travelDate)}</td>
+              <td class="print-val" colspan="3">${escapeHtml(data.travelDate)}</td>
+            </tr>
+            <tr>
               <td class="print-lbl" style="width:58px;">出張先</td>
-              <td class="print-val">${escapeHtml(data.businessDestination)}</td>
+              <td class="print-val" colspan="3">${escapeHtml(data.businessDestination)}</td>
             </tr>
             <tr>
               <td class="print-lbl">目　的</td>
@@ -1030,11 +1033,13 @@
           : '承認者へワンタイムコード付きのメールを送信しました。';
       $('completeNote').classList.toggle('field-note--warning', Boolean(result.emailSendFailed));
 
+      previewDialog.close();
       completeDialog.showModal();
       clientToken = '';
     } catch (error) {
       saveState.textContent = '送信失敗';
       submitButton.disabled = false;
+      previewDialog.close(); // エラーバナーは本体側にあるため、確認画面を閉じて見えるようにする
       showSubmitError(error.message);
     } finally {
       $('submitProcessingMessage').hidden = true;
